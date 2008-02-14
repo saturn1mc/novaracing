@@ -3,6 +3,7 @@
  */
 package environment;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.util.LinkedList;
 
@@ -19,6 +20,9 @@ public class Circuit {
 	
 	public void draw(Graphics2D g2d){
 		for(Waypoint wp : waypoints){
+			wp.draw(g2d);
+			
+			g2d.setPaint(Color.black);
 			g2d.drawLine((int)wp.getPosition().x, (int)wp.getPosition().y, (int)wp.getNext().getPosition().x, (int)wp.getNext().getPosition().y);
 		}
 		

@@ -14,9 +14,16 @@ import environment.Environment;
  *
  */
 public abstract class Element {
+	
 	protected String name;
 	protected Point2d position;
 	
+	public Element(String name, Point2d position) {
+		super();
+		this.name = name;
+		this.position = position;
+	}
+
 	public void draw(Graphics2D g2d){
 		//TODO
 	}
