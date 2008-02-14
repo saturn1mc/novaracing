@@ -27,9 +27,14 @@ public class Environment {
 		
 		circuit.draw(g2d);
 		
-		//TODO
 		for(Element elem : elements){
 			elem.draw(g2d);
+		}
+	}
+	
+	public void update(){
+		for(Element elem : elements){
+			elem.update(this);
 		}
 	}
 
