@@ -3,6 +3,7 @@
  */
 package elements;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 
 import javax.vecmath.Point2d;
@@ -28,7 +29,7 @@ public class Obstacle extends Element {
 	
 	@Override
 	public void draw(Graphics2D g2d){
-		// TODO Auto-generated method stub
-		super.draw(g2d);
+		g2d.setPaint(Color.red);
+		g2d.drawOval((int)(position.x - (radius/2.0d)), (int)(position.y - (radius/2.0d)), (int)radius, (int)radius);
 	}
 }

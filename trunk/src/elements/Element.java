@@ -24,13 +24,9 @@ public abstract class Element {
 		this.position = position;
 	}
 
-	public void draw(Graphics2D g2d){
-		//TODO
-	}
+	public void draw(Graphics2D g2d){}
 	
-	public void update(Environment env){
-		//TODO
-	}
+	public void update(Environment env){}
 
 	public String getName() {
 		return name;

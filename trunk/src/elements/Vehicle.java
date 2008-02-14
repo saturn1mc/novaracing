@@ -3,6 +3,7 @@
  */
 package elements;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 
 import javax.vecmath.Point2d;
@@ -16,20 +17,21 @@ import environment.Waypoint;
  */
 public class Vehicle extends Element {
 	
+	protected static final double radius = 15.0; 
+	
 	protected double damages;
 	protected Vector2d speed;
 	protected Waypoint currentWayPoint;
 	
-	public Vehicle(String name, Point2d position, double damages, Vector2d speed, Waypoint currentWayPoint) {
+	public Vehicle(String name, Point2d position, Waypoint currentWayPoint) {
 		super(name, position);
-		this.damages = damages;
-		this.speed = speed;
 		this.currentWayPoint = currentWayPoint;
 	}
 
 	@Override
 	public void draw(Graphics2D g2d){
-		// TODO
+		g2d.setPaint(Color.BLUE);
+		g2d.drawOval((int)(position.x - (radius/2.0d)), (int)(position.y - (radius/2.0d)), (int)radius, (int)radius);
 	}
 
 	public double getDamages() {

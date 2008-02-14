@@ -13,6 +13,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.vecmath.Point2d;
 
+import elements.Vehicle;
 import environment.Circuit;
 import environment.Environment;
 import environment.Waypoint;
@@ -43,15 +44,23 @@ public class Nova extends JPanel {
 		super.paintComponents(g);
 		
 		Graphics2D g2d = (Graphics2D)g;
-		g2d.setPaint(new GradientPaint(0, 0, Color.LIGHT_GRAY, getWidth(), getHeight(), Color.DARK_GRAY));
+		g2d.setPaint(new GradientPaint(0, 0, Color.lightGray, getWidth(), getHeight(), Color.gray));
 		g2d.fillRect(0, 0, getWidth(), getHeight());
 		
 		environment.draw(g2d);
 	}
 	
+	public void update(){
+		environment.update();
+		repaint();
+	}
+	
 	public void loadTestRace(){
 		Circuit circuit = new Circuit();
 		
+		/*
+		 * Waypoints
+		 */
 		Waypoint wp1 = new Waypoint(new Point2d(400, 100), 10);
 		Waypoint wp2 = new Waypoint(new Point2d(200, 100), 10);
 		Waypoint wp3 = new Waypoint(new Point2d(20, 200), 10);
@@ -80,6 +89,12 @@ public class Nova extends JPanel {
 		circuit.addWaypoint(wp6);
 		
 		environment.setCircuit(circuit);
+		
+		/*
+		 * Vehicles
+		 */
+		Vehicle v1 = new Vehicle("v1", wp1.getPosition(), wp1.getNext());
+		environment.addElement(v1);
 	}
 	
 	public static void main(String[] args) {

@@ -12,6 +12,7 @@ import java.util.LinkedList;
  *
  */
 public class Circuit {
+	
 	private LinkedList<Waypoint> waypoints;
 	
 	public Circuit(){
@@ -25,8 +26,6 @@ public class Circuit {
 			g2d.setPaint(Color.black);
 			g2d.drawLine((int)wp.getPosition().x, (int)wp.getPosition().y, (int)wp.getNext().getPosition().x, (int)wp.getNext().getPosition().y);
 		}
-		
-		//TODO
 	}
 
 	public LinkedList<Waypoint> getWaypoints() {
