@@ -24,6 +24,9 @@ public class Environment {
 
 
 	public void draw(Graphics2D g2d){
+		
+		circuit.draw(g2d);
+		
 		//TODO
 		for(Element elem : elements){
 			elem.draw(g2d);
