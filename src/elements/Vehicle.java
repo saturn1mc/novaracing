@@ -9,6 +9,7 @@ import java.awt.Graphics2D;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
+import environment.Environment;
 import environment.Waypoint;
 
 /**
@@ -21,19 +22,40 @@ public class Vehicle extends Element {
 	
 	protected double damages;
 	protected Vector2d speed;
-	protected Waypoint currentWayPoint;
+	protected Waypoint target;
 	
 	public Vehicle(String name, Point2d position, Waypoint currentWayPoint) {
 		super(name, position);
-		this.currentWayPoint = currentWayPoint;
+		this.speed = new Vector2d(0 , 0);
+		this.target = currentWayPoint;
 	}
 
 	@Override
 	public void draw(Graphics2D g2d){
 		g2d.setPaint(Color.BLUE);
 		g2d.drawOval((int)(position.x - (radius/2.0d)), (int)(position.y - (radius/2.0d)), (int)radius, (int)radius);
+		drawVector(speed, g2d, Color.magenta);
 	}
-
+	
+	private void drawVector(Vector2d v, Graphics2D g2d, Color c){
+		g2d.setPaint(c);
+		g2d.drawLine((int)position.x, (int)position.y, (int)(position.x + v.x), (int)(position.y + v.y));
+		g2d.drawOval((int)(position.x + v.x - 2.5), (int)(position.y + v.y - 2.5), 5, 5);
+	}
+	
+	@Override
+	public void update(Environment env) {
+		this.position = target.getPosition();
+		this.target = target.getNext();
+		steeringForSeek();
+	}
+	
+	private void steeringForSeek(){
+		speed.set(target.getPosition().x - position.x, target.getPosition().y - position.y);
+		speed.normalize();
+		speed.scale(20.0);
+	}
+	
 	public double getDamages() {
 		return damages;
 	}
@@ -51,10 +73,10 @@ public class Vehicle extends Element {
 	}
 
 	public Waypoint getCurrentWayPoint() {
-		return currentWayPoint;
+		return target;
 	}
 
 	public void setCurrentWayPoint(Waypoint currentWayPoint) {
-		this.currentWayPoint = currentWayPoint;
+		this.target = currentWayPoint;
 	}
 }
