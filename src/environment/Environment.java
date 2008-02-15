@@ -17,6 +17,7 @@ public class Environment {
 	private Circuit circuit;
 	private LinkedList<Element> elements;
 	
+	
 	public Environment() {
 		super();
 		elements = new LinkedList<Element>();
