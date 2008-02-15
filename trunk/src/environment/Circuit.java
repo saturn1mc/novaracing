@@ -7,6 +7,9 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.util.LinkedList;
 
+import elements.Vehicle;
+import elements.Waypoint;
+
 /**
  * @author camille
  *
@@ -38,5 +41,10 @@ public class Circuit {
 	
 	public void addWaypoint(Waypoint wp){
 		waypoints.add(wp);
+	}
+	
+	public boolean onRoad(Vehicle vehicle){
+		//TODO
+		return true;
 	}
 }

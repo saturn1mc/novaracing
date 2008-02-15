@@ -10,7 +10,6 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
 import environment.Environment;
-import environment.Waypoint;
 
 /**
  * @author camille
@@ -45,9 +44,18 @@ public class Vehicle extends Element {
 	
 	@Override
 	public void update(Environment env) {
-		this.position = target.getPosition();
-		this.target = target.getNext();
+		updatePosition();
 		steeringForSeek();
+	}
+	
+	private void updatePosition(){
+		if(target.isReachedBy(this)){
+			this.position.set(target.getPosition());
+			this.target = target.getNext();
+		}
+		else{
+			position.add(speed);
+		}
 	}
 	
 	private void steeringForSeek(){

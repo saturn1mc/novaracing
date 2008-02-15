@@ -14,9 +14,9 @@ import javax.swing.JPanel;
 import javax.vecmath.Point2d;
 
 import elements.Vehicle;
+import elements.Waypoint;
 import environment.Circuit;
 import environment.Environment;
-import environment.Waypoint;
 
 /**
  * @author camille
@@ -104,7 +104,7 @@ public class Nova extends JPanel {
 		/*
 		 * Vehicles
 		 */
-		Vehicle v1 = new Vehicle("v1", wp1.getPosition(), wp1.getNext());
+		Vehicle v1 = new Vehicle("v1", new Point2d(wp1.getPosition()), wp1.getNext());
 		environment.addElement(v1);
 	}
 
@@ -114,7 +114,7 @@ public class Nova extends JPanel {
 				do {
 					Nova.this.update();
 					try {
-						Thread.sleep(500);
+						Thread.sleep(200);
 					} catch (InterruptedException _ex) {
 					}
 				} while (true);

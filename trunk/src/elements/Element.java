@@ -43,4 +43,13 @@ public abstract class Element {
 	public void setPosition(Point2d position) {
 		this.position = position;
 	}
+	
+	/*
+	 * Influences
+	 */
+	public void effectOn(Element elem){
+		affectBy(this);
+	}
+	
+	public void affectBy(Element elem){}
 }
