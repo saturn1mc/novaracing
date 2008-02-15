@@ -20,44 +20,55 @@ import environment.Waypoint;
 
 /**
  * @author camille
- *
+ * 
  */
 public class Nova extends JPanel {
+
+	private boolean run;
 
 	/**
 	 * Generated SVUID
 	 */
 	private static final long serialVersionUID = 1L;
-	
+
 	private Environment environment;
-	
+
 	/**
 	 * Default instance of {@link Nova}
 	 */
-	public Nova(){
+	public Nova() {
+		run = true;
 		environment = new Environment();
-		setPreferredSize(new Dimension(420, 400));
+		setPreferredSize(new Dimension(600, 400));
 	}
-	
+
 	@Override
 	public void paintComponent(Graphics g) {
 		super.paintComponents(g);
-		
-		Graphics2D g2d = (Graphics2D)g;
+
+		Graphics2D g2d = (Graphics2D) g;
 		g2d.setPaint(new GradientPaint(0, 0, Color.lightGray, getWidth(), getHeight(), Color.gray));
 		g2d.fillRect(0, 0, getWidth(), getHeight());
-		
+
 		environment.draw(g2d);
 	}
-	
-	public void update(){
+
+	public void update() {
 		environment.update();
 		repaint();
 	}
-	
-	public void loadTestRace(){
+
+	public boolean isRunning() {
+		return run;
+	}
+
+	public void setRunning(boolean running) {
+		run = running;
+	}
+
+	public void loadTestRace() {
 		Circuit circuit = new Circuit();
-		
+
 		/*
 		 * Waypoints
 		 */
@@ -65,9 +76,9 @@ public class Nova extends JPanel {
 		Waypoint wp2 = new Waypoint(new Point2d(200, 100), 10);
 		Waypoint wp3 = new Waypoint(new Point2d(20, 200), 10);
 		Waypoint wp4 = new Waypoint(new Point2d(200, 300), 10);
-		Waypoint wp5 = new Waypoint(new Point2d(200, 300), 10);
-		Waypoint wp6 = new Waypoint(new Point2d(200, 200), 10);
-		
+		Waypoint wp5 = new Waypoint(new Point2d(400, 300), 10);
+		Waypoint wp6 = new Waypoint(new Point2d(580, 200), 10);
+
 		wp1.setNext(wp2);
 		wp1.setPrevious(wp6);
 		wp2.setNext(wp3);
@@ -80,36 +91,52 @@ public class Nova extends JPanel {
 		wp5.setPrevious(wp4);
 		wp6.setNext(wp1);
 		wp6.setPrevious(wp5);
-		
+
 		circuit.addWaypoint(wp1);
 		circuit.addWaypoint(wp2);
 		circuit.addWaypoint(wp3);
 		circuit.addWaypoint(wp4);
 		circuit.addWaypoint(wp5);
 		circuit.addWaypoint(wp6);
-		
+
 		environment.setCircuit(circuit);
-		
+
 		/*
 		 * Vehicles
 		 */
 		Vehicle v1 = new Vehicle("v1", wp1.getPosition(), wp1.getNext());
 		environment.addElement(v1);
 	}
-	
+
+	public Thread getAnimationThread() {
+		return new Thread() {
+			public void run() {
+				do {
+					Nova.this.update();
+					try {
+						Thread.sleep(500);
+					} catch (InterruptedException _ex) {
+					}
+				} while (true);
+			}
+		};
+	}
+
 	public static void main(String[] args) {
-		
+
 		JFrame frame = new JFrame("Nova Racing");
-		
+
 		Nova nova = new Nova();
 		nova.loadTestRace();
-	
+
 		frame.add(nova);
-		
+
 		frame.pack();
 		frame.setResizable(false);
 		frame.setLocationRelativeTo(null);
-		
+
 		frame.setVisible(true);
+		
+		nova.getAnimationThread().start();
 	}
 }
