@@ -114,8 +114,9 @@ public class Nova extends JPanel {
 				do {
 					Nova.this.update();
 					try {
-						Thread.sleep(200);
+						Thread.sleep(100);
 					} catch (InterruptedException _ex) {
+						//nothing
 					}
 				} while (true);
 			}
@@ -136,7 +137,7 @@ public class Nova extends JPanel {
 		frame.setLocationRelativeTo(null);
 
 		frame.setVisible(true);
-		
+
 		nova.getAnimationThread().start();
 	}
 }

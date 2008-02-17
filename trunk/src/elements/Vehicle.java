@@ -17,15 +17,27 @@ import environment.Environment;
  */
 public class Vehicle extends Element {
 	
+	protected static final double maxSpeed = 10.0;
+	protected static final double acceleration = 0.02;
+	
+	protected static final double predictionCoeff = 10.0;
 	protected static final double radius = 15.0; 
 	
 	protected double damages;
-	protected Vector2d speed;
+	protected double speed;
+	
+	protected Vector2d direction;
+	protected Vector2d velocity;
+	protected Point2d futurePosition;
+	
 	protected Waypoint target;
 	
 	public Vehicle(String name, Point2d position, Waypoint currentWayPoint) {
 		super(name, position);
-		this.speed = new Vector2d(0 , 0);
+		this.speed = 0.0;
+		this.direction = new Vector2d(0 , 0);
+		this.velocity = new Vector2d(0 , 0);
+		this.futurePosition = new Point2d(0, 0);
 		this.target = currentWayPoint;
 	}
 
@@ -33,19 +45,30 @@ public class Vehicle extends Element {
 	public void draw(Graphics2D g2d){
 		g2d.setPaint(Color.BLUE);
 		g2d.drawOval((int)(position.x - (radius/2.0d)), (int)(position.y - (radius/2.0d)), (int)radius, (int)radius);
-		drawVector(speed, g2d, Color.magenta);
+		drawVector(g2d, velocity, Color.magenta);
+		drawPoint(g2d, futurePosition, Color.orange);
 	}
 	
-	private void drawVector(Vector2d v, Graphics2D g2d, Color c){
+	private void drawVector(Graphics2D g2d, Vector2d v, Color c){
 		g2d.setPaint(c);
 		g2d.drawLine((int)position.x, (int)position.y, (int)(position.x + v.x), (int)(position.y + v.y));
 		g2d.drawOval((int)(position.x + v.x - 2.5), (int)(position.y + v.y - 2.5), 5, 5);
 	}
 	
+	private void drawPoint(Graphics2D g2d, Point2d p, Color c){
+		g2d.setPaint(c);
+		g2d.drawOval((int)(p.x - 2.5), (int)(p.y - 2.5), 5, 5);
+	}
+	
 	@Override
-	public void update(Environment env) {
+	public void update(Environment env) {	
 		updatePosition();
 		steeringForSeek();
+		updateFuturePosition();
+	}
+	
+	private void updateFuturePosition(){
+		futurePosition.set(position.x + (velocity.x * predictionCoeff), position.y + (velocity.y * predictionCoeff));
 	}
 	
 	private void updatePosition(){
@@ -54,14 +77,28 @@ public class Vehicle extends Element {
 			this.target = target.getNext();
 		}
 		else{
-			position.add(speed);
+			velocity.set(direction.x * speed, direction.y * speed);
+			position.add(velocity);
 		}
 	}
 	
 	private void steeringForSeek(){
-		speed.set(target.getPosition().x - position.x, target.getPosition().y - position.y);
-		speed.normalize();
-		speed.scale(20.0);
+		direction.set(target.getPosition().x - position.x, target.getPosition().y - position.y);
+		direction.normalize();
+		
+		accelerate();
+	}
+	
+	private void accelerate(){
+		if(speed < maxSpeed){
+			speed += maxSpeed * acceleration;
+		}
+	}
+	
+	private void decelerate(){
+		if(speed > 0){
+			speed -= maxSpeed * acceleration;
+		}
 	}
 	
 	public double getDamages() {
@@ -73,11 +110,11 @@ public class Vehicle extends Element {
 	}
 
 	public Vector2d getSpeed() {
-		return speed;
+		return direction;
 	}
 
 	public void setSpeed(Vector2d speed) {
-		this.speed = speed;
+		this.direction = speed;
 	}
 
 	public Waypoint getCurrentWayPoint() {
