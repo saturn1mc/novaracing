@@ -72,12 +72,12 @@ public class Nova extends JPanel {
 		/*
 		 * Waypoints
 		 */
-		Waypoint wp1 = new Waypoint(new Point2d(400, 100), 10);
-		Waypoint wp2 = new Waypoint(new Point2d(200, 100), 10);
-		Waypoint wp3 = new Waypoint(new Point2d(20, 200), 10);
-		Waypoint wp4 = new Waypoint(new Point2d(200, 300), 10);
-		Waypoint wp5 = new Waypoint(new Point2d(400, 300), 10);
-		Waypoint wp6 = new Waypoint(new Point2d(580, 200), 10);
+		Waypoint wp1 = new Waypoint(new Point2d(400, 100), 20);
+		Waypoint wp2 = new Waypoint(new Point2d(200, 100), 20);
+		Waypoint wp3 = new Waypoint(new Point2d(20, 200), 20);
+		Waypoint wp4 = new Waypoint(new Point2d(200, 300), 20);
+		Waypoint wp5 = new Waypoint(new Point2d(400, 300), 20);
+		Waypoint wp6 = new Waypoint(new Point2d(580, 200), 20);
 
 		wp1.setNext(wp2);
 		wp1.setPrevious(wp6);
@@ -106,6 +106,9 @@ public class Nova extends JPanel {
 		 */
 		Vehicle v1 = new Vehicle("v1", new Point2d(wp1.getPosition()), wp1.getNext());
 		environment.addElement(v1);
+		
+		Vehicle v2 = new Vehicle("v2", new Point2d(wp2.getPosition()), wp2.getNext());
+		//environment.addElement(v2);
 	}
 
 	public Thread getAnimationThread() {
