@@ -72,12 +72,57 @@ public class Nova extends JPanel {
 		/*
 		 * Waypoints
 		 */
-		Waypoint wp1 = new Waypoint(new Point2d(400, 100), 20);
-		Waypoint wp2 = new Waypoint(new Point2d(200, 100), 20);
-		Waypoint wp3 = new Waypoint(new Point2d(20, 200), 20);
-		Waypoint wp4 = new Waypoint(new Point2d(200, 300), 20);
-		Waypoint wp5 = new Waypoint(new Point2d(400, 300), 20);
-		Waypoint wp6 = new Waypoint(new Point2d(580, 200), 20);
+		Waypoint wp1 = new Waypoint(new Point2d(400, 100));
+		Waypoint wp2 = new Waypoint(new Point2d(200, 100));
+		Waypoint wp3 = new Waypoint(new Point2d(20, 200));
+		Waypoint wp4 = new Waypoint(new Point2d(200, 300));
+		Waypoint wp5 = new Waypoint(new Point2d(400, 300));
+		Waypoint wp6 = new Waypoint(new Point2d(580, 200));
+
+		wp1.setNext(wp2);
+		wp1.setPrevious(wp6);
+		wp2.setNext(wp3);
+		wp2.setPrevious(wp1);
+		wp3.setNext(wp4);
+		wp3.setPrevious(wp2);
+		wp4.setNext(wp5);
+		wp4.setPrevious(wp3);
+		wp5.setNext(wp6);
+		wp5.setPrevious(wp4);
+		wp6.setNext(wp1);
+		wp6.setPrevious(wp5);
+
+		circuit.addWaypoint(wp1);
+		circuit.addWaypoint(wp2);
+		circuit.addWaypoint(wp3);
+		circuit.addWaypoint(wp4);
+		circuit.addWaypoint(wp5);
+		circuit.addWaypoint(wp6);
+
+		environment.setCircuit(circuit);
+
+		/*
+		 * Vehicles
+		 */
+		Vehicle v1 = new Vehicle("v1", new Point2d(wp1.getPosition()), wp1.getNext());
+		environment.addElement(v1);
+		
+		Vehicle v2 = new Vehicle("v2", new Point2d(wp2.getPosition()), wp2.getNext());
+		environment.addElement(v2);
+	}
+	
+	public void loadTestRace2() {
+		Circuit circuit = new Circuit();
+
+		/*
+		 * Waypoints
+		 */
+		Waypoint wp1 = new Waypoint(new Point2d(200, 20));
+		Waypoint wp2 = new Waypoint(new Point2d(20, 150));
+		Waypoint wp3 = new Waypoint(new Point2d(200, 200));
+		Waypoint wp4 = new Waypoint(new Point2d(300, 300));
+		Waypoint wp5 = new Waypoint(new Point2d(580, 380));
+		Waypoint wp6 = new Waypoint(new Point2d(400, 40));
 
 		wp1.setNext(wp2);
 		wp1.setPrevious(wp6);
