@@ -19,11 +19,11 @@ public class Vehicle extends Element {
 
 	public static final double radius = 15.0d;
 
-	protected static final double maxSpeed = 0.8d;
+	protected static final double maxSpeed = 1.0d;
 	protected static final double acceleration = 0.02d;
-	protected static final double deceleration = 0.02d;
+	protected static final double deceleration = 0.015d;
 
-	protected static final double predictionCoeff = 30.0d;
+	protected static final double predictionCoeff = 10.0d;
 
 	protected double damages;
 	protected double speed;
@@ -94,7 +94,7 @@ public class Vehicle extends Element {
 
 		Vector2d correction = new Vector2d(nearestPointOnRoad.x - futurePosition.x, nearestPointOnRoad.y - futurePosition.y);
 
-		if ( correction.length() > (target.radius / 1.5d) ) {
+		if ( correction.length() >= (Waypoint.radius / 1.5d) ) {
 
 			correction.normalize();
 			correction.scale(1.0d / 1.5d);
