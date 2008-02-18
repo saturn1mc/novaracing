@@ -47,7 +47,7 @@ public class Nova extends JPanel {
 		super.paintComponents(g);
 
 		Graphics2D g2d = (Graphics2D) g;
-		g2d.setPaint(new GradientPaint(0, 0, Color.lightGray, getWidth(), getHeight(), Color.gray));
+		g2d.setPaint(new GradientPaint(0, 0, new Color(0.0f, 0.5f, 0.0f), getWidth(), getHeight(), new Color(0.0f, 0.7f, 0.0f)));
 		g2d.fillRect(0, 0, getWidth(), getHeight());
 
 		environment.draw(g2d);
@@ -108,7 +108,7 @@ public class Nova extends JPanel {
 		environment.addElement(v1);
 		
 		Vehicle v2 = new Vehicle("v2", new Point2d(wp2.getPosition()), wp2.getNext());
-		//environment.addElement(v2);
+		environment.addElement(v2);
 	}
 
 	public Thread getAnimationThread() {
@@ -117,7 +117,7 @@ public class Nova extends JPanel {
 				do {
 					Nova.this.update();
 					try {
-						Thread.sleep(100);
+						Thread.sleep(5);
 					} catch (InterruptedException _ex) {
 						//nothing
 					}
