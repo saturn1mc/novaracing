@@ -5,6 +5,7 @@ package environment;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Polygon;
 import java.util.LinkedList;
 
 import elements.Vehicle;
@@ -24,9 +25,25 @@ public class Circuit {
 	
 	public void draw(Graphics2D g2d){
 		for(Waypoint wp : waypoints){
+			
+			if(wp.getNext() != null){
+				g2d.setPaint(Color.darkGray);
+				
+				Polygon p = new Polygon();
+				p.addPoint((int)wp.getPosition().x, (int)(wp.getPosition().y + wp.getRadius()));
+				p.addPoint((int)wp.getNext().getPosition().x, (int)(wp.getNext().getPosition().y + wp.getRadius()));
+				p.addPoint((int)wp.getNext().getPosition().x, (int)(wp.getNext().getPosition().y - wp.getRadius()));
+				p.addPoint((int)wp.getPosition().x, (int)(wp.getPosition().y - wp.getRadius()));
+				
+				g2d.fill(p);
+			}
+		}
+		
+		for(Waypoint wp : waypoints){
+			
 			wp.draw(g2d);
 			
-			g2d.setPaint(Color.black);
+			g2d.setPaint(Color.white);
 			g2d.drawLine((int)wp.getPosition().x, (int)wp.getPosition().y, (int)wp.getNext().getPosition().x, (int)wp.getNext().getPosition().y);
 		}
 	}
