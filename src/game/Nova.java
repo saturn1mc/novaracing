@@ -176,7 +176,7 @@ public class Nova extends JPanel {
 		JFrame frame = new JFrame("Nova Racing");
 
 		Nova nova = new Nova();
-		nova.loadTestRace2();
+		nova.loadTestRace();
 
 		frame.add(nova);
 
