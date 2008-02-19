@@ -23,7 +23,7 @@ public class Vehicle extends Element {
 	protected static final double acceleration = 0.02d;
 	protected static final double deceleration = 0.015d;
 
-	protected static final double predictionCoeff = 10.0d;
+	protected static final double predictionCoeff = 30.0d;
 
 	protected double damages;
 	protected double speed;
@@ -94,35 +94,19 @@ public class Vehicle extends Element {
 
 		Vector2d correction = new Vector2d(nearestPointOnRoad.x - futurePosition.x, nearestPointOnRoad.y - futurePosition.y);
 
-		if ( correction.length() >= (Waypoint.radius / 1.5d) ) {
+		if (correction.length() >= (Waypoint.radius)) {
 
 			correction.normalize();
-			correction.scale(1.0d / 1.5d);
-
 			direction.add(correction);
 
 			decelerate();
-			
+
 		} else {
 			accelerate();
 		}
 
 		direction.normalize();
 	}
-
-	//	private void steeringForSeek() {
-	//
-	//		nearestPointOnRoad = target.nearestPointOnRoad(futurePosition);
-	//
-	//		direction.set(target.getPosition().x - position.x, target.getPosition().y - position.y);
-	//		direction.normalize();
-	//
-	//		if (nearestPointOnRoad.x != target.getPosition().x || nearestPointOnRoad.y != target.getPosition().y) {
-	//			accelerate();
-	//		} else {
-	//			decelerate();
-	//		}
-	//	}
 
 	private void accelerate() {
 		if (speed < maxSpeed) {

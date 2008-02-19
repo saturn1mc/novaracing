@@ -20,7 +20,7 @@ import elements.Waypoint;
 public class Circuit {
 
 	private static final Stroke middleLineStroke = new BasicStroke(1.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[] { 9 }, 0);
-	private static final Stroke roadStroke = new BasicStroke((float)Waypoint.radius);
+	private static final Stroke roadStroke = new BasicStroke(2.0f * (float)Waypoint.radius);
 	
 	private LinkedList<Waypoint> waypoints;
 	
