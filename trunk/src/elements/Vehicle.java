@@ -20,8 +20,8 @@ public class Vehicle extends Element {
 	public static final double radius = 15.0d;
 	protected static final double mass = 1.0d;
 	protected static final double maxSpeed = 1.0d;
-	protected static final double maxForce = 0.04d;
-	protected static final double predictionCoeff = 40.0d;
+	protected static final double maxForce = 0.05d;
+	protected static final double predictionCoeff = 50.0d;
 
 	protected double damages;
 
@@ -80,7 +80,9 @@ public class Vehicle extends Element {
 			this.target = target.getNext();
 		}
 		
-		steering.add(correction);
+		steering.normalize();
+		
+		steering.add(truncate(correction, maxForce));
 		
 		Vector2d steeringForce = new Vector2d(truncate(steering, maxForce));
 		Vector2d acceleration = new Vector2d(steeringForce);
@@ -103,15 +105,9 @@ public class Vehicle extends Element {
 
 		correction.set(nearestPointOnRoad.x - futurePosition.x, nearestPointOnRoad.y - futurePosition.y);
 
-		if (correction.length() >= (Waypoint.radius)) {
-
-			correction.normalize();
-
-		} else {
+		if (correction.length() < Waypoint.radius) {
 			correction.set(0, 0);
 		}
-
-		steering.normalize();
 	}
 	
 	private Vector2d truncate(Vector2d v, double max){
