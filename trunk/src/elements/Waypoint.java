@@ -17,9 +17,9 @@ public class Waypoint extends Element {
 
 	private static int id = 0;
 	private static final String DEFAULT_NAME = "waypoint_";
-	
+
 	public static final double radius = 30.0d;
-	
+
 	protected Waypoint next;
 	protected Waypoint previous;
 
@@ -34,65 +34,43 @@ public class Waypoint extends Element {
 
 	public Point2d nearestPointOnRoad(Point2d p) {
 
-		Point2d onNext = null;
-		Point2d onPrev = null;
-
-		Point2d p1;
-		Point2d p2;
-
 		if (previous != null) {
 
-			if (position.x < previous.position.x) {
-				p1 = position;
-				p2 = previous.position;
+			Point2d nearest = null;
+			Point2d A = position;
+			Point2d B = previous.position;
+
+			double L = Math.sqrt(((B.x - A.x) * (B.x - A.x)) + ((B.y - A.y) * (B.y - A.y)));
+			double R = (((A.y - p.y) * (A.y - B.y)) - ((A.x - p.x) * (B.x - A.x))) / (L * L);
+
+			if (R == 0) {
+				// Projection is on A
+				nearest = new Point2d(A.x, A.y);
+			} else if (R == 1) {
+				// Projection is on B
+				nearest = new Point2d(B.x, B.y);
+			} else if (0 < R && R < 1) {
+				// Projection is into segment AB
+				nearest = new Point2d(A.x + (R * (B.x - A.x)), A.y + (R * (B.y - A.y)));
 			} else {
-				p1 = previous.position;
-				p2 = position;
-			}
 
-			if (p.x >= p1.x && p.x <= p2.x) {
-				double y = (((p2.y - p1.y) / (p2.x - p1.x)) * (p.x - p1.x)) + p1.y;
-				onPrev = new Point2d(p.x, y);
-			}
-		}
+				if (next != null) {
+					double x = A.x + (R * (B.x - A.x));
+					double y = A.y + (R * (B.y - A.y));
 
-		if (next != null) {
+					double dist = new Vector2d(x - position.x, y - position.y).length();
 
-			if (position.x < next.position.x) {
-				p1 = position;
-				p2 = next.position;
-			} else {
-				p1 = next.position;
-				p2 = position;
-			}
+					Vector2d nextDir = new Vector2d(next.position.x - position.x, next.position.y - position.y);
+					nextDir.normalize();
 
-			double y = (((p2.y - p1.y) / (p2.x - p1.x)) * (p.x - p1.x)) + p1.y;
-			
-			if (p.x >= p1.x && p.x <= p2.x) {
-				onNext = new Point2d(p.x, y);
-			}
-			else{
-				onNext = new Point2d(p.x, y);
-				
-				Vector2d correction = new Vector2d(onNext.x - position.x, onNext.y - position.y);
-				
-				correction.scale(2.0d);
-				onNext.sub(correction);
-			}
-		}
-
-		if (onNext != null && onPrev != null) {
-			return onPrev;
-		} else {
-			if (onPrev != null) {
-				return onPrev;
-			} else {
-				if (onNext != null) {
-					return onNext;
-				} else {
-					return position;
+					nearest = new Point2d(position.x + (nextDir.x * dist), position.y + (nextDir.y * dist));
 				}
 			}
+
+			return nearest;
+
+		} else {
+			return null;
 		}
 	}
 
