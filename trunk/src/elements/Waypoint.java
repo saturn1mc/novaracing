@@ -53,7 +53,8 @@ public class Waypoint extends Element {
 				// Projection is into segment AB
 				nearest = new Point2d(A.x + (R * (B.x - A.x)), A.y + (R * (B.y - A.y)));
 			} else {
-
+				// Projection is outside segment AB
+				// TODO test on which side it is
 				if (next != null) {
 					double x = A.x + (R * (B.x - A.x));
 					double y = A.y + (R * (B.y - A.y));

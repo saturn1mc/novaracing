@@ -18,17 +18,15 @@ import environment.Environment;
 public class Vehicle extends Element {
 
 	public static final double radius = 15.0d;
-
+	protected static final double mass = 1.0d;
 	protected static final double maxSpeed = 1.0d;
-	protected static final double acceleration = 0.02d;
-	protected static final double deceleration = 0.015d;
-
-	protected static final double predictionCoeff = 30.0d;
+	protected static final double maxForce = 0.04d;
+	protected static final double predictionCoeff = 40.0d;
 
 	protected double damages;
-	protected double speed;
 
-	protected Vector2d direction;
+	protected Vector2d steering;
+	protected Vector2d correction;
 	protected Vector2d velocity;
 	protected Point2d futurePosition;
 
@@ -38,13 +36,14 @@ public class Vehicle extends Element {
 
 	public Vehicle(String name, Point2d position, Waypoint target) {
 		super(name, position);
-		this.speed = 0.0d;
+		
 		this.velocity = new Vector2d(0, 0);
 		this.futurePosition = new Point2d(0, 0);
 		this.target = target;
-
-		this.direction = new Vector2d(target.getPosition().x - position.x, target.getPosition().y - position.y);
-		this.direction.normalize();
+		
+		this.steering = new Vector2d(target.getPosition().x - position.x, target.getPosition().y - position.y);
+		
+		this.correction = new Vector2d(0, 0);
 	}
 
 	@Override
@@ -71,53 +70,60 @@ public class Vehicle extends Element {
 
 	@Override
 	public void update(Environment env) {
-		updatePosition();
+		updateForces();
 		updateFuturePosition();
-		steeringForSeek();
+		computeTrajectoryCorrection();
+	}
+	
+	private void updateForces() {
+		if (target.isReachedBy(this)) {
+			this.target = target.getNext();
+		}
+		
+		steering.add(correction);
+		
+		Vector2d steeringForce = new Vector2d(truncate(steering, maxForce));
+		Vector2d acceleration = new Vector2d(steeringForce);
+		acceleration.scale(1.0d / mass);
+		
+		Vector2d speed = new Vector2d(velocity);
+		speed.add(acceleration);
+		
+		velocity.set(truncate(speed, maxSpeed));
+		
+		position.add(velocity);
 	}
 
 	private void updateFuturePosition() {
 		futurePosition.set(position.x + (velocity.x * predictionCoeff), position.y + (velocity.y * predictionCoeff));
 	}
 
-	private void updatePosition() {
-		if (target.isReachedBy(this)) {
-			this.target = target.getNext();
-		} else {
-			velocity.set(direction.x * speed, direction.y * speed);
-			position.add(velocity);
-		}
-	}
-
-	private void steeringForSeek() {
+	private void computeTrajectoryCorrection() {
 		nearestPointOnRoad = target.nearestPointOnRoad(futurePosition);
 
-		Vector2d correction = new Vector2d(nearestPointOnRoad.x - futurePosition.x, nearestPointOnRoad.y - futurePosition.y);
+		correction.set(nearestPointOnRoad.x - futurePosition.x, nearestPointOnRoad.y - futurePosition.y);
 
 		if (correction.length() >= (Waypoint.radius)) {
 
 			correction.normalize();
-			direction.add(correction);
-
-			decelerate();
 
 		} else {
-			accelerate();
+			correction.set(0, 0);
 		}
 
-		direction.normalize();
+		steering.normalize();
 	}
-
-	private void accelerate() {
-		if (speed < maxSpeed) {
-			speed += maxSpeed * acceleration;
+	
+	private Vector2d truncate(Vector2d v, double max){
+		
+		Vector2d vT = new Vector2d(v);
+		double l = vT.length();
+		
+		if(l > max){
+			vT.scale(max / l);
 		}
-	}
-
-	private void decelerate() {
-		if (speed > maxSpeed * 4.0d * acceleration) {
-			speed -= maxSpeed * deceleration;
-		}
+		
+		return vT;
 	}
 
 	public double getDamages() {
@@ -129,11 +135,11 @@ public class Vehicle extends Element {
 	}
 
 	public Vector2d getSpeed() {
-		return direction;
+		return steering;
 	}
 
 	public void setSpeed(Vector2d speed) {
-		this.direction = speed;
+		this.steering = speed;
 	}
 
 	public Waypoint getCurrentWayPoint() {
