@@ -207,7 +207,7 @@ public class Nova extends JPanel {
 				do {
 					Nova.this.update();
 					try {
-						Thread.sleep(4);
+						Thread.sleep(5);
 					} catch (InterruptedException _ex) {
 						//nothing
 					}
