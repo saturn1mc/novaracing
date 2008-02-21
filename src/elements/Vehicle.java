@@ -5,11 +5,8 @@ package elements;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.Rectangle;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Rectangle2D;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
@@ -63,6 +60,16 @@ public class Vehicle extends Element {
 	private Vector2d velocity;
 
 	/**
+	 * Local space X axis
+	 */
+	private Vector2d forward;
+
+	/**
+	 * Local space Y axis
+	 */
+	private Vector2d side;
+
+	/**
 	 * Predicted position
 	 */
 	private Point2d futurePosition;
@@ -94,6 +101,9 @@ public class Vehicle extends Element {
 	public Vehicle(String name, Point2d position, Waypoint target) {
 		super(name, position);
 
+		this.forward = new Vector2d(0, 0);
+		this.side = new Vector2d(0, 0);
+
 		this.velocity = new Vector2d(0, 0);
 		this.futurePosition = new Point2d(0, 0);
 		this.target = target;
@@ -107,6 +117,12 @@ public class Vehicle extends Element {
 
 	@Override
 	public void update(Environment env) {
+
+		forward.set(velocity);
+		forward.normalize();
+
+		side.set((forward.x * Math.cos(Math.PI / 2.0d)) - (forward.y * Math.sin(Math.PI / 2.0d)), (forward.y * Math.cos(Math.PI / 2.0d)) + (forward.x * Math.sin(Math.PI / 2.0d)));
+		side.normalize();
 
 		//TODO take the other elements effects into account
 		//(collision, bonuses, obstacles, ...)
@@ -125,16 +141,11 @@ public class Vehicle extends Element {
 		position.add(velocity);
 
 		/* Updating sight */
-		Vector2d s = new Vector2d(futurePosition.x - position.x, futurePosition.y - position.y);
-		s.normalize();
-		Vector2d snorm = new Vector2d(1.0d, -(s.x / s.y));
-		snorm.normalize();
-
 		sight.reset();
-		sight.addPoint((int) (position.x + (snorm.x * (radius / 2.0d))), (int) (position.y + (snorm.y * (radius / 2.0d))));
-		sight.addPoint((int) (position.x - (snorm.x * (radius / 2.0d))), (int) (position.y - (snorm.y * (radius / 2.0d))));
-		sight.addPoint((int) (futurePosition.x - (snorm.x * (radius / 2.0d))), (int) (futurePosition.y - (snorm.y * (radius / 2.0d))));
-		sight.addPoint((int) (futurePosition.x + (snorm.x * (radius / 2.0d))), (int) (futurePosition.y + (snorm.y * (radius / 2.0d))));
+		sight.addPoint((int) (position.x + (side.x * (radius / 2.0d))), (int) (position.y + (side.y * (radius / 2.0d))));
+		sight.addPoint((int) (position.x - (side.x * (radius / 2.0d))), (int) (position.y - (side.y * (radius / 2.0d))));
+		sight.addPoint((int) (futurePosition.x - (side.x * (radius / 2.0d))), (int) (futurePosition.y - (side.y * (radius / 2.0d))));
+		sight.addPoint((int) (futurePosition.x + (side.x * (radius / 2.0d))), (int) (futurePosition.y + (side.y * (radius / 2.0d))));
 	}
 
 	/**
@@ -178,6 +189,8 @@ public class Vehicle extends Element {
 	 */
 	private void computeTrajectoryCorrection(Environment env) {
 
+		boolean avoiding = false;
+
 		correction.set(0, 0);
 		nearestPointOnRoad = target.nearestPointOnRoad(futurePosition);
 
@@ -187,11 +200,31 @@ public class Vehicle extends Element {
 		for (Element e : env.getElements()) {
 			if (e != this) {
 				if (e.avoidedBy(this)) {
-					
-					Rectangle bbox = new Rectangle((int)(e.position.x - (e.getRadius()/2.0d)), (int)(e.position.y - (e.getRadius()/2.0d)), (int)radius, (int)radius);
-					
-					if (sight.intersects(bbox)) {
-						System.out.println(e.getName() + " in sight of " + name);
+
+					Rectangle bbox = new Rectangle((int) (e.position.x - (e.getRadius() / 2.0d)), (int) (e.position.y - (e.getRadius() / 2.0d)), (int) radius, (int) radius);
+					Rectangle intersection = bbox.intersection(sight.getBounds());
+
+					/* If the element is on the way */
+					if (!intersection.isEmpty()) {
+
+						avoiding = true;
+
+						Point2d A = position;
+						Point2d B = futurePosition;
+
+						double L = Math.sqrt(((B.x - A.x) * (B.x - A.x)) + ((B.y - A.y) * (B.y - A.y)));
+						double S = (((A.y - e.position.y) * (B.x - A.x)) - ((A.x - e.position.x) * (B.y - A.y))) / (L * L);
+
+						Vector2d avoidanceCorrection;
+
+						if (S > 0) {
+							avoidanceCorrection = new Vector2d(side.x, side.y);
+						} else {
+							avoidanceCorrection = new Vector2d(-side.x, -side.y);
+						}
+
+						avoidanceCorrection.scale(intersection.getWidth());
+						correction.add(avoidanceCorrection);
 					}
 				}
 			}
@@ -203,7 +236,7 @@ public class Vehicle extends Element {
 		Vector2d roadCorrection = new Vector2d(nearestPointOnRoad.x - futurePosition.x, nearestPointOnRoad.y - futurePosition.y);
 
 		/* If the future position is not on the road*/
-		if (roadCorrection.length() > Waypoint.radius) {
+		if (roadCorrection.length() > Waypoint.radius && !avoiding) {
 			/* No correction is needed */
 			correction.add(roadCorrection);
 		}
@@ -248,7 +281,7 @@ public class Vehicle extends Element {
 	public void setVelocity(Vector2d velocity) {
 		this.velocity = velocity;
 	}
-	
+
 	@Override
 	public double getRadius() {
 		return radius;
@@ -314,7 +347,14 @@ public class Vehicle extends Element {
 		/* Its velocity */
 		drawVector(g2d, velocity, Color.magenta, 20.0d);
 
-		/* Future position and corresponding point on road */
+		/* Its trajectory correction */
+		drawVector(g2d, correction, Color.green, 1.0d);
+
+		/* Its local space*/
+		drawVector(g2d, forward, Color.cyan, 20.0d);
+		drawVector(g2d, side, Color.cyan, 20.0d);
+
+		/* Its future position and the corresponding point on the road */
 		drawPoint(g2d, futurePosition, Color.orange, 8.0d);
 		drawPoint(g2d, nearestPointOnRoad, Color.red, 8.0d);
 		g2d.drawLine((int) futurePosition.x, (int) futurePosition.y, (int) nearestPointOnRoad.x, (int) nearestPointOnRoad.y);
