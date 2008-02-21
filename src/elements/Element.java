@@ -6,7 +6,6 @@ package elements;
 import java.awt.Graphics2D;
 
 import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
 
 import environment.Environment;
 
@@ -16,19 +15,32 @@ import environment.Environment;
  */
 public abstract class Element {
 	
+	/**
+	 * The element's name (could be used as an identifier)
+	 */
 	protected String name;
+	
+	/**
+	 * The element's absolute position in the window
+	 */
 	protected Point2d position;
-	protected Vector2d forces;
 	
 	public Element(String name, Point2d position) {
 		super();
 		this.name = name;
 		this.position = position;
-		this.forces = new Vector2d(0, 0);
 	}
 
+	/**
+	 * Draws the element
+	 * @param g2d
+	 */
 	public void draw(Graphics2D g2d){}
 	
+	/**
+	 * Update the element
+	 * @param env
+	 */
 	public void update(Environment env){}
 
 	public String getName() {
@@ -47,12 +59,29 @@ public abstract class Element {
 		this.position = position;
 	}
 	
-	/*
-	 * Influences
+	/**
+	 * Avoidance indicator for a {@link Vehicle}
+	 * @param vehicle
+	 * @return <code>true</code> if the element must be avoided or else false
 	 */
-	public void effectOn(Element elem){
-		affectBy(this);
-	}
+	public boolean avoidedBy(Vehicle vehicle){return false;}
 	
-	public void affectBy(Element elem){}
+	/**
+	 * Avoidance indicator for a {@link HumanVehicle}
+	 * @param vehicle
+	 * @return <code>true</code> if the element must be avoided or else false
+	 */
+	public boolean avoidedBy(HumanVehicle vehicle){return false;}
+	
+	/**
+	 * Effect on {@link Vehicle}.
+	 * @param vehicle
+	 */
+	public void effectOn(Vehicle vehicle){}
+	
+	/**
+	 * Effect on {@link HumanVehicle}
+	 * @param vehicle
+	 */
+	public void effectOn(HumanVehicle vehicle){}
 }
