@@ -18,20 +18,44 @@ public class Waypoint extends Element {
 	private static int id = 0;
 	private static final String DEFAULT_NAME = "waypoint_";
 
+	/**
+	 * Waypoints radius
+	 */
 	public static final double radius = 30.0d;
 
+	/**
+	 * Next waypoint (could be null)
+	 */
 	protected Waypoint next;
+
+	/**
+	 * Previous waypoint (could be null)
+	 */
 	protected Waypoint previous;
 
 	public Waypoint(Point2d position) {
 		super(DEFAULT_NAME + "" + id++, position);
 	}
 
-	public boolean isReachedBy(Vehicle vehicle) {
-		Vector2d dist = new Vector2d(position.x - vehicle.getPosition().x, position.y - vehicle.getPosition().y);
+	/**
+	 * Indicates if a vehicle as reached the {@link Waypoint}
+	 * 
+	 * @param vehicle
+	 * @return <code>true</code> if the element as reached the
+	 *         {@link Waypoint}, or else <code>false</code>
+	 */
+	public boolean isReachedBy(Element element) {
+		Vector2d dist = new Vector2d(position.x - element.getPosition().x, position.y - element.getPosition().y);
 		return (dist.length() <= radius);
 	}
 
+	/**
+	 * Return the nearest point on the road corresponding to the given point.
+	 * 
+	 * @param p
+	 * @return the nearest point on the road (i.e. on one of the segment : (<code>this.position</code>-<code>previous.position</code>)
+	 *         or (<code>this.position</code>-<code>next.position</code>))
+	 */
 	public Point2d nearestPointOnRoad(Point2d p) {
 
 		if (previous != null) {
@@ -79,6 +103,30 @@ public class Waypoint extends Element {
 	public void draw(Graphics2D g2d) {
 		g2d.setPaint(Color.magenta);
 		g2d.drawOval((int) (position.x - (radius / 2.0d)), (int) (position.y - (radius / 2.0d)), (int) radius, (int) radius);
+	}
+
+	public Vector2d getNextDirection() {
+
+		Vector2d direction = new Vector2d(0, 0);
+
+		if (next != null) {
+			direction.set(next.position.x - position.x, next.position.y - position.y);
+			direction.normalize();
+		}
+
+		return direction;
+	}
+
+	public Vector2d getPreviousDirection() {
+
+		Vector2d direction = new Vector2d(0, 0);
+
+		if (previous != null) {
+			direction.set(previous.position.x - position.x, previous.position.y - position.y);
+			direction.normalize();
+		}
+
+		return direction;
 	}
 
 	public Waypoint getNext() {

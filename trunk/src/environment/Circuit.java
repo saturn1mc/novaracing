@@ -19,9 +19,12 @@ import elements.Waypoint;
  */
 public class Circuit {
 
-	private static final Stroke middleLineStroke = new BasicStroke(1.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[] { 9 }, 0);
+	private static final Stroke middleLineStroke = new BasicStroke(1.5f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_BEVEL, 0, new float[] { 9 }, 0);
 	private static final Stroke roadStroke = new BasicStroke(2.0f * (float)Waypoint.radius);
 	
+	/**
+	 * Circuit's {@link Waypoint}
+	 */
 	private LinkedList<Waypoint> waypoints;
 	
 	public Circuit() {
@@ -30,24 +33,26 @@ public class Circuit {
 
 	public void draw(Graphics2D g2d) {
 
+		/* Building the circuit shape */
 		Polygon circuit = new Polygon();
-
+		
 		for (Waypoint wp : waypoints) {
 			circuit.addPoint((int) wp.getPosition().x, (int) wp.getPosition().y);
 		}
 		
-		//Road
+		/* Drawing the road */
 		g2d.setStroke(roadStroke);
 		g2d.setPaint(Color.darkGray);
 		g2d.draw(circuit);
 		
-		//Line
+		/* Drawing the middle line */
 		g2d.setStroke(middleLineStroke);
 		g2d.setPaint(Color.white);
 		g2d.draw(circuit);
 		
 		g2d.setStroke(new BasicStroke()); //restore default stroke
 		
+		/* Drawing the waypoints */
 		for (Waypoint wp : waypoints) {
 			wp.draw(g2d);
 		}
