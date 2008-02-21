@@ -38,7 +38,7 @@ public abstract class Element {
 	public void draw(Graphics2D g2d){}
 	
 	/**
-	 * Update the element
+	 * Update the element on each frame
 	 * @param env
 	 */
 	public void update(Environment env){}
@@ -58,6 +58,8 @@ public abstract class Element {
 	public void setPosition(Point2d position) {
 		this.position = position;
 	}
+	
+	public double getRadius(){return 0.0d;}
 	
 	/**
 	 * Avoidance indicator for a {@link Vehicle}

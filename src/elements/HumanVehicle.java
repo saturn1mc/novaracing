@@ -184,6 +184,24 @@ public class HumanVehicle extends Element {
 		this.velocity = velocity;
 	}
 	
+	@Override
+	public double getRadius() {
+		return radius;
+	}
+	
+	/* ------------------------- */
+	/* ---      Avoidance    --- */
+	/* ------------------------- */
+	@Override
+	public boolean avoidedBy(Vehicle vehicle) {
+		return true;
+	}
+
+	@Override
+	public boolean avoidedBy(HumanVehicle vehicle) {
+		return true;
+	}
+	
 	/* ------------------------- */
 	/* ---     Influences    --- */
 	/* ------------------------- */
