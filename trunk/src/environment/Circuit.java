@@ -10,7 +10,6 @@ import java.awt.Polygon;
 import java.awt.Stroke;
 import java.util.LinkedList;
 
-import elements.Vehicle;
 import elements.Waypoint;
 
 /**
@@ -52,7 +51,7 @@ public class Circuit {
 		
 		g2d.setStroke(new BasicStroke()); //restore default stroke
 		
-		/* Drawing the waypoints */
+		/* Drawing the way points */
 		for (Waypoint wp : waypoints) {
 			wp.draw(g2d);
 		}
@@ -68,10 +67,5 @@ public class Circuit {
 
 	public void addWaypoint(Waypoint wp) {
 		waypoints.add(wp);
-	}
-
-	public boolean onRoad(Vehicle vehicle) {
-		//TODO
-		return true;
 	}
 }

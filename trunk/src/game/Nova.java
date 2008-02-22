@@ -15,6 +15,7 @@ import javax.swing.JPanel;
 import javax.vecmath.Point2d;
 
 import elements.HumanVehicle;
+import elements.Obstacle;
 import elements.Vehicle;
 import elements.Waypoint;
 import environment.Circuit;
@@ -192,6 +193,18 @@ public class Nova extends JPanel {
 		
 		Vehicle v4 = new Vehicle("v4", new Point2d(wp4.getPosition()), wp4.getNext());
 		environment.addElement(v4);
+		
+		/*
+		 * Obstacles
+		 */
+		Obstacle o1 = new Obstacle("wall", new Point2d(wp6.getPosition().x - 10, wp6.getPosition().y + 50), 30);
+		environment.addElement(o1);
+		
+		Obstacle o2 = new Obstacle("wall2", new Point2d(wp1.getPosition().x - 50, wp1.getPosition().y), 30);
+		environment.addElement(o2);
+		
+		Obstacle o3 = new Obstacle("wall3", new Point2d(wp4.getPosition().x, wp4.getPosition().y - 50), 30);
+		environment.addElement(o3);
 		
 		/*
 		 * Human

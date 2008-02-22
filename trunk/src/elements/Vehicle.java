@@ -33,6 +33,11 @@ public class Vehicle extends Element {
 	 * Vehicle's maximum speed
 	 */
 	private static final double maxSpeed = 1.0d;
+	
+	/**
+	 * Vehicle's current speed
+	 */
+	private double speed = 0.0d;
 
 	/**
 	 * Maximum force that can be applied to the vehicle
@@ -154,6 +159,17 @@ public class Vehicle extends Element {
 	 */
 	private void updateForces() {
 
+		if(target.onRoad(this)){
+			if(speed < maxSpeed){
+				speed += 0.01d * maxSpeed;
+			}
+		}
+		else{
+			if(speed > maxSpeed * 0.2d){
+				speed -= 0.003d * maxSpeed;
+			}
+		}
+		
 		/* Changing target */
 		if (target.isReachedBy(this)) {
 			this.target = target.getNext();
@@ -169,10 +185,10 @@ public class Vehicle extends Element {
 		acceleration.scale(1.0d / mass);
 
 		/* Computing velocity */
-		Vector2d speed = new Vector2d(velocity);
-		speed.add(acceleration);
+		Vector2d vForce = new Vector2d(velocity);
+		vForce.add(acceleration);
 
-		velocity.set(truncate(speed, maxSpeed));
+		velocity.set(truncate(vForce, speed));
 	}
 
 	/**
@@ -266,11 +282,15 @@ public class Vehicle extends Element {
 		return steering;
 	}
 
-	public void setSpeed(Vector2d speed) {
+	public void setSteering(Vector2d speed) {
 		this.steering = speed;
 	}
+	
+	public void setSpeed(double speed){
+		this.speed = speed;
+	}
 
-	public Waypoint getCurrentWayPoint() {
+	public Waypoint getCurrentTarget() {
 		return target;
 	}
 

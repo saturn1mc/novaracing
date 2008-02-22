@@ -129,6 +129,38 @@ public class Waypoint extends Element {
 		return direction;
 	}
 
+	public boolean onRoad(Element element) {
+		if (previous != null) {
+
+			Point2d nearest = null;
+			Point2d A = position;
+			Point2d B = previous.position;
+
+			double L = Math.sqrt(((B.x - A.x) * (B.x - A.x)) + ((B.y - A.y) * (B.y - A.y)));
+			double R = (((A.y - element.position.y) * (A.y - B.y)) - ((A.x - element.position.x) * (B.x - A.x))) / (L * L);
+
+			if (R == 0) {
+				// Projection is on A
+				nearest = new Point2d(A.x, A.y);
+			} else if (R == 1) {
+				// Projection is on B
+				nearest = new Point2d(B.x, B.y);
+			} else if (0 < R && R < 1) {
+				// Projection is into segment AB
+				nearest = new Point2d(A.x + (R * (B.x - A.x)), A.y + (R * (B.y - A.y)));
+			} else {
+				return false;
+			}
+
+			Vector2d dist = new Vector2d(element.position.x - nearest.x, element.position.y - nearest.y);
+
+			return (dist.length() <= (radius + Vehicle.radius));
+
+		} else {
+			return false;
+		}
+	}
+
 	public Waypoint getNext() {
 		return next;
 	}
