@@ -142,8 +142,15 @@ public class HumanVehicle extends Element {
 
 	private void updateForces() {
 
+		if(!target.onRoad(this)){
+			if(speed > maxSpeed * 0.2d){
+				speed -= 0.003d * maxSpeed;
+			}
+		}
+		
 		/* Changing target */
 		if (target.isReachedBy(this)) {
+			System.out.println(name + " reached " + target.getName());
 			this.target = target.getNext();
 		}
 		
@@ -184,6 +191,10 @@ public class HumanVehicle extends Element {
 		this.velocity = velocity;
 	}
 	
+	public void setSpeed(double speed){
+		this.speed = speed;
+	}
+	
 	@Override
 	public double getRadius() {
 		return radius;
@@ -220,7 +231,7 @@ public class HumanVehicle extends Element {
 	public void effectOn(HumanVehicle vehicle) {
 		Vector2d distance = new Vector2d(vehicle.position.x - position.x, vehicle.position.y - position.y);
 		
-		if(distance.length() < (vehicle.radius + radius)){
+		if(distance.length() < (Vehicle.radius + radius)){
 			vehicle.setVelocity(distance);
 		}
 	}
