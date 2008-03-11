@@ -10,8 +10,10 @@ import elements.Waypoint;
 public class Path {
 	private boolean solved;
 	private LinkedList<Waypoint> path;
+	private double distance;
 
 	public Path(boolean s) {
+		distance = Double.MAX_VALUE;
 		solved = s;
 		path = new LinkedList<Waypoint>();
 	}
@@ -25,6 +27,8 @@ public class Path {
 			if(!path.isEmpty()){
 				wp.setNext(path.getFirst());
 				path.getFirst().setPrevious(wp);
+				
+				distance += AStar.distance(wp.getPosition(), path.getFirst().getPosition());
 			}
 			
 			path.addFirst(wp);
@@ -38,6 +42,8 @@ public class Path {
 			if(!path.isEmpty()){
 				wp.setNext(path.getFirst());
 				path.getFirst().setPrevious(wp);
+				
+				distance += AStar.distance(wp.getPosition(), path.getFirst().getPosition());
 			}
 			
 			path.addFirst(wp);
@@ -56,5 +62,9 @@ public class Path {
 
 	public boolean isSolved() {
 		return solved;
+	}
+	
+	public double getDistance(){
+		return distance;
 	}
 }

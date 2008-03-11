@@ -22,10 +22,10 @@ import elements.Waypoint;
  * 
  */
 public class Leader extends Bot {
-	
+
 	public static final int FORMATION_NONE = 0;
 	public static final int FORMATION_LINE = 1;
-	public static final int FORMATION_SQUARE = 2;	
+	public static final int FORMATION_SQUARE = 2;
 
 	/**
 	 * Vehicle's radius
@@ -40,7 +40,7 @@ public class Leader extends Bot {
 	/**
 	 * Vehicle's maximum speed
 	 */
-	private static final double maxSpeed = 1.0d;
+	private static final double maxSpeed = 0.5d;
 
 	/**
 	 * Vehicle's current speed
@@ -96,14 +96,14 @@ public class Leader extends Bot {
 	 * Current target
 	 */
 	private Waypoint target;
-	
+
 	/**
 	 * Latest registered follower
 	 */
 	private LinkedList<Follower> followers;
 
 	private int formation;
-	
+
 	/**
 	 * Damages
 	 */
@@ -127,14 +127,14 @@ public class Leader extends Bot {
 		this.steering = new Vector2d(0, 0);
 
 		this.correction = new Vector2d(0, 0);
-		
+
 		this.followers = new LinkedList<Follower>();
 		this.formation = formation;
 	}
 
 	@Override
 	public void update(BattleField env) {
-		
+
 		if (target != null) {
 
 			// TODO take the other elements effects into account
@@ -304,32 +304,53 @@ public class Leader extends Bot {
 		steering.normalize();
 	}
 	
-	public synchronized void registerFollower(Follower f){
+	public void setFormation(int formation){
+		this.formation = formation;
+	}
+
+	public synchronized void registerFollower(Follower f) {
 		followers.add(f);
 	}
-	
-	public synchronized int getFollowerId(Follower f){
-		return followers.indexOf(f);
+
+	public synchronized int getFollowerId(Follower f) {
+		return followers.indexOf(f) + 1;
 	}
-	
-	public synchronized int getFollowersNumber(){
+
+	public synchronized int getFollowersNumber() {
 		return followers.size();
 	}
-	
+
 	public synchronized Point2d getTargetFor(Follower f) {
-		
-		switch(formation){
+
+		Point2d target;
+
+		switch (formation) {
 		case FORMATION_NONE:
-		break;
-		
-		case FORMATION_SQUARE:
+			target = this.position;
 			break;
+
+		case FORMATION_SQUARE:
+			int squareSize = (int)Math.sqrt(getFollowersNumber());
 			
+			int id = getFollowerId(f);
+			int column = (id-1) % squareSize;
+			int line = (id-1) / squareSize;
+			
+			Point2d reference = new Point2d(this.position.x + (this.forward.x * (-radius * 2.0)) + (this.side.x * -(radius * 2.0) * (squareSize/2)), this.position.y + (this.forward.y * -(radius * 2.0)) + (this.side.y * -(radius * 2.0) * (squareSize/2)));
+			target = new Point2d(reference.x + (this.side.x * (radius * 2.0 * column)) + (this.forward.x * -(radius * 2.0 * column)), reference.y + (this.side.y * (radius * 2.0 * line)) + (this.forward.y * -(radius * 2.0 * line)));
+			
+			break;
+
 		case FORMATION_LINE:
+			target = new Point2d(this.position.x + (this.forward.x * -(radius * 2.0 * getFollowerId(f))), this.position.y + (this.forward.y * -(radius * 2.0 * getFollowerId(f))));
+			break;
+
+		default:
+			target = this.position;
 			break;
 		}
-		
-		return this.position;
+
+		return target;
 	}
 
 	public void setVelocity(Vector2d velocity) {

@@ -90,6 +90,7 @@ public class Follower extends Bot {
 	 * Current targets
 	 */
 	private Leader leader;
+	private Point2d target;
 
 	/**
 	 * Damages
@@ -119,6 +120,8 @@ public class Follower extends Bot {
 	@Override
 	public void update(BattleField env) {
 		if (leader != null) {
+			
+			target = leader.getTargetFor(this);
 
 			// TODO take the other elements effects into account
 			// (collision, bonuses, obstacles, ...)
@@ -234,8 +237,6 @@ public class Follower extends Bot {
 			if (!avoiding) {
 
 				speed = getArrivalSpeed();
-
-				Point2d target = leader.getTargetFor(this);
 				
 				Vector2d targetCorrection = new Vector2d(target.x - futurePosition.x, target.y - futurePosition.y);
 				correction.add(targetCorrection);
@@ -244,7 +245,7 @@ public class Follower extends Bot {
 	}
 
 	private double getArrivalSpeed() {
-		Vector2d targetOffset = new Vector2d(leader.getPosition().x - position.x, leader.getPosition().y - position.y);
+		Vector2d targetOffset = new Vector2d(target.x - position.x, target.y - position.y);
 		double distance = targetOffset.length();
 		double rampedSpeed = maxSpeed * (distance / (2.0 * radius));
 		double clippedSpeed = Math.min(rampedSpeed, maxSpeed);
