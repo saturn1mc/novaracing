@@ -32,10 +32,13 @@ public class BattleField extends Applet implements Runnable, MouseListener, Mous
 	private Leader leader;
 	private LinkedList<Follower> followers;
 
-	static final public float MAXX = 10000F; // Size of the battlefield, in float (not pixels)
+	static final public float MAXX = 10000F; // Size of the battlefield, in
+	// float (not pixels)
 	static final public float MAXY = 7500F;
 
-	static final public int WXSIZE = 800; // size in pixels (in x, the y is automatically deduced)
+	static final public int WXSIZE = 800; // size in pixels (in x, the y is
+
+	// automatically deduced)
 
 	public void init() {
 		super.init();
@@ -66,7 +69,7 @@ public class BattleField extends Applet implements Runnable, MouseListener, Mous
 
 		Random random = new Random();
 
-		for (int i = 0; i < 9; i++) {
+		for (int i = 0; i < 12; i++) {
 			Follower f = new Follower("Soldier_" + i, new Point2d(random.nextInt(200), random.nextInt(200)));
 			followers.add(f);
 
@@ -107,6 +110,7 @@ public class BattleField extends Applet implements Runnable, MouseListener, Mous
 			try {
 				Thread.sleep(10);
 			} catch (InterruptedException _ex) {
+				_ex.printStackTrace();
 			}
 		} while (true);
 	}
@@ -235,13 +239,18 @@ public class BattleField extends Applet implements Runnable, MouseListener, Mous
 	@Override
 	public void keyPressed(KeyEvent e) {
 		if (e.getKeyCode() == KeyEvent.VK_S) {
-			//Square formation
+			// Square formation
 			leader.setFormation(Leader.FORMATION_SQUARE);
 		}
 
 		if (e.getKeyCode() == KeyEvent.VK_L) {
-			//Line formation
+			// Line formation
 			leader.setFormation(Leader.FORMATION_LINE);
+		}
+		
+		if (e.getKeyCode() == KeyEvent.VK_W) {
+			// Wing formation
+			leader.setFormation(Leader.FORMATION_WING);
 		}
 	}
 
