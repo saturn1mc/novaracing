@@ -58,7 +58,7 @@ public class BattleField extends Applet implements Runnable, MouseListener, Mous
 	}
 
 	public void initBots() {
-		leader = new Leader("Nova", new Point2d(0, 0));
+		leader = new Leader("Nova", new Point2d(0, 0), Leader.FORMATION_LINE);
 		followers = new LinkedList<Follower>();
 		
 		Random random = new Random();
@@ -66,7 +66,9 @@ public class BattleField extends Applet implements Runnable, MouseListener, Mous
 		for(int i = 0; i < 10; i++){
 			Follower f = new Follower("Soldier_" + i, new Point2d(random.nextInt(200), random.nextInt(200)));
 			followers.add(f);
-			f.setTarget(leader);
+			
+			f.setLeader(leader);
+			leader.registerFollower(f);
 		}
 	}
 

@@ -7,6 +7,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.Rectangle;
+import java.util.LinkedList;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
@@ -21,6 +22,10 @@ import elements.Waypoint;
  * 
  */
 public class Leader extends Bot {
+	
+	public static final int FORMATION_NONE = 0;
+	public static final int FORMATION_LINE = 1;
+	public static final int FORMATION_SQUARE = 2;	
 
 	/**
 	 * Vehicle's radius
@@ -91,7 +96,14 @@ public class Leader extends Bot {
 	 * Current target
 	 */
 	private Waypoint target;
+	
+	/**
+	 * Latest registered follower
+	 */
+	private LinkedList<Follower> followers;
 
+	private int formation;
+	
 	/**
 	 * Damages
 	 */
@@ -101,7 +113,7 @@ public class Leader extends Bot {
 	 * Current bonus element
 	 */
 	// private Element bonus;
-	public Leader(String name, Point2d position) {
+	public Leader(String name, Point2d position, int formation) {
 		super(name, position);
 
 		this.forward = new Vector2d(0, 0);
@@ -115,10 +127,14 @@ public class Leader extends Bot {
 		this.steering = new Vector2d(0, 0);
 
 		this.correction = new Vector2d(0, 0);
+		
+		this.followers = new LinkedList<Follower>();
+		this.formation = formation;
 	}
 
 	@Override
 	public void update(BattleField env) {
+		
 		if (target != null) {
 
 			// TODO take the other elements effects into account
@@ -229,7 +245,7 @@ public class Leader extends Bot {
 						avoidanceCorrection = new Vector2d(-side.x, -side.y);
 					}
 
-					avoidanceCorrection.scale(intersection.getWidth());
+					avoidanceCorrection.scale(intersection.getWidth() * 2);
 					correction.add(avoidanceCorrection);
 				}
 			}
@@ -286,6 +302,34 @@ public class Leader extends Bot {
 
 		this.steering = new Vector2d(target.getPosition().x - position.x, target.getPosition().y - position.y);
 		steering.normalize();
+	}
+	
+	public synchronized void registerFollower(Follower f){
+		followers.add(f);
+	}
+	
+	public synchronized int getFollowerId(Follower f){
+		return followers.indexOf(f);
+	}
+	
+	public synchronized int getFollowersNumber(){
+		return followers.size();
+	}
+	
+	public synchronized Point2d getTargetFor(Follower f) {
+		
+		switch(formation){
+		case FORMATION_NONE:
+		break;
+		
+		case FORMATION_SQUARE:
+			break;
+			
+		case FORMATION_LINE:
+			break;
+		}
+		
+		return this.position;
 	}
 
 	public void setVelocity(Vector2d velocity) {

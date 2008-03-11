@@ -85,11 +85,11 @@ public class Follower extends Bot {
 	 * Vehicle's sight
 	 */
 	private Polygon sight;
-
+	
 	/**
-	 * Current target
+	 * Current targets
 	 */
-	private Leader target;
+	private Leader leader;
 
 	/**
 	 * Damages
@@ -108,7 +108,7 @@ public class Follower extends Bot {
 
 		this.velocity = new Vector2d(0, 0);
 		this.futurePosition = new Point2d(0, 0);
-		this.target = null;
+		this.leader = null;
 		this.sight = new Polygon();
 
 		this.steering = new Vector2d(0, 0);
@@ -118,7 +118,7 @@ public class Follower extends Bot {
 
 	@Override
 	public void update(BattleField env) {
-		if (target != null) {
+		if (leader != null) {
 
 			// TODO take the other elements effects into account
 			// (collision, bonuses, obstacles, ...)
@@ -152,9 +152,8 @@ public class Follower extends Bot {
 	private void updateForces() {
 
 		/* Changing target */
-		if (target != null) {
-
-			speed = maxSpeed;
+		if (leader != null) {
+			speed = getArrivalSpeed();
 
 		} else {
 			speed = 0;
@@ -193,7 +192,7 @@ public class Follower extends Bot {
 
 		correction.set(0, 0);
 
-		if (target != null) {
+		if (leader != null) {
 
 			boolean avoiding = false;
 
@@ -224,19 +223,33 @@ public class Follower extends Bot {
 						avoidanceCorrection = new Vector2d(-side.x, -side.y);
 					}
 
-					avoidanceCorrection.scale(intersection.getWidth());
+					avoidanceCorrection.scale(intersection.getWidth() * 2);
 					correction.add(avoidanceCorrection);
 				}
 			}
 
 			/*
-			 * Correction to stay on target
+			 * Correction to stay on target (arrival)
 			 */
 			if (!avoiding) {
-				Vector2d targetCorrection = new Vector2d(target.getPosition().x - futurePosition.x, target.getPosition().y - futurePosition.y);
+
+				speed = getArrivalSpeed();
+
+				Point2d target = leader.getTargetFor(this);
+				
+				Vector2d targetCorrection = new Vector2d(target.x - futurePosition.x, target.y - futurePosition.y);
 				correction.add(targetCorrection);
 			}
 		}
+	}
+
+	private double getArrivalSpeed() {
+		Vector2d targetOffset = new Vector2d(leader.getPosition().x - position.x, leader.getPosition().y - position.y);
+		double distance = targetOffset.length();
+		double rampedSpeed = maxSpeed * (distance / (2.0 * radius));
+		double clippedSpeed = Math.min(rampedSpeed, maxSpeed);
+
+		return clippedSpeed;
 	}
 
 	private Vector2d truncate(Vector2d v, double max) {
@@ -271,15 +284,15 @@ public class Follower extends Bot {
 		this.speed = speed;
 	}
 
-	public Leader getCurrentTarget() {
-		return target;
+	public Bot getCurrentTarget() {
+		return leader;
 	}
 
-	public void setTarget(Leader target) {
+	public void setLeader(Leader leader) {
 
-		this.target = target;
+		this.leader = leader;
 
-		this.steering = new Vector2d(target.getPosition().x - position.x, target.getPosition().y - position.y);
+		this.steering = new Vector2d(leader.getPosition().x - position.x, leader.getPosition().y - position.y);
 		steering.normalize();
 	}
 
