@@ -50,7 +50,7 @@ public class Leader extends Bot {
 	/**
 	 * Maximum force that can be applied to the vehicle
 	 */
-	private static final double maxForce = 0.05d;
+	private static final double maxForce = 0.2d;
 
 	/**
 	 * Number of frame(s) to anticipate the movement
@@ -155,10 +155,10 @@ public class Leader extends Bot {
 
 			/* Updating sight */
 			sight.reset();
-			sight.addPoint((int) (position.x + (side.x * (radius / 2.0d))), (int) (position.y + (side.y * (radius / 2.0d))));
-			sight.addPoint((int) (position.x - (side.x * (radius / 2.0d))), (int) (position.y - (side.y * (radius / 2.0d))));
-			sight.addPoint((int) (futurePosition.x - (side.x * (radius / 2.0d))), (int) (futurePosition.y - (side.y * (radius / 2.0d))));
-			sight.addPoint((int) (futurePosition.x + (side.x * (radius / 2.0d))), (int) (futurePosition.y + (side.y * (radius / 2.0d))));
+			sight.addPoint((int) (position.x + (side.x * radius)), (int) (position.y + (side.y * radius)));
+			sight.addPoint((int) (position.x - (side.x * radius)), (int) (position.y - (side.y * radius)));
+			sight.addPoint((int) (futurePosition.x - (side.x * radius)), (int) (futurePosition.y - (side.y * radius)));
+			sight.addPoint((int) (futurePosition.x + (side.x * radius)), (int) (futurePosition.y + (side.y * radius)));
 
 			if (target.isReachedBy(this)) {
 				this.target = target.getNext();
@@ -303,8 +303,8 @@ public class Leader extends Bot {
 		this.steering = new Vector2d(target.getPosition().x - position.x, target.getPosition().y - position.y);
 		steering.normalize();
 	}
-	
-	public void setFormation(int formation){
+
+	public void setFormation(int formation) {
 		this.formation = formation;
 	}
 
@@ -330,15 +330,16 @@ public class Leader extends Bot {
 			break;
 
 		case FORMATION_SQUARE:
-			int squareSize = (int)Math.sqrt(getFollowersNumber());
-			
+			int squareSize = (int) Math.sqrt(getFollowersNumber());
+
 			int id = getFollowerId(f);
-			int column = (id-1) % squareSize;
-			int line = (id-1) / squareSize;
-			
-			Point2d reference = new Point2d(this.position.x + (this.forward.x * (-radius * 2.0)) + (this.side.x * -(radius * 2.0) * (squareSize/2)), this.position.y + (this.forward.y * -(radius * 2.0)) + (this.side.y * -(radius * 2.0) * (squareSize/2)));
-			target = new Point2d(reference.x + (this.side.x * (radius * 2.0 * column)) + (this.forward.x * -(radius * 2.0 * column)), reference.y + (this.side.y * (radius * 2.0 * line)) + (this.forward.y * -(radius * 2.0 * line)));
-			
+			int column = (id - 1) % squareSize;
+			int line = (id - 1) / squareSize;
+
+			Point2d reference = new Point2d(this.position.x + (this.forward.x * (-radius * 2.0)) + (this.side.x * -(radius * 2.0) * (squareSize / 2)), this.position.y + (this.forward.y * -(radius * 2.0))
+					+ (this.side.y * -(radius * 2.0) * (squareSize / 2)));
+			target = new Point2d(reference.x + (this.side.x * (radius * 2.0 * column)) + (this.forward.x * -(radius * 2.0 * line)), reference.y + (this.side.y * (radius * 2.0 * column)) + (this.forward.y * -(radius * 2.0 * line)));
+
 			break;
 
 		case FORMATION_LINE:
@@ -387,22 +388,24 @@ public class Leader extends Bot {
 		g2d.drawOval((int) (position.x - (radius / 2.0d)), (int) (position.y - (radius / 2.0d)), (int) radius, (int) radius);
 		g2d.fillOval((int) (position.x - (radius / 2.0d)), (int) (position.y - (radius / 2.0d)), (int) radius, (int) radius);
 
-		/* Its sight rectangle */
-		g2d.setPaint(Color.orange);
-		g2d.draw(sight);
+		if (Bot.showForces) {
+			/* Its sight rectangle */
+			g2d.setPaint(Color.orange);
+			g2d.draw(sight);
 
-		/* Its velocity */
-		drawVector(g2d, velocity, Color.magenta, 20.0d);
+			/* Its velocity */
+			drawVector(g2d, velocity, Color.magenta, 20.0d);
 
-		/* Its trajectory correction */
-		drawVector(g2d, correction, Color.green, 1.0d);
+			/* Its trajectory correction */
+			drawVector(g2d, correction, Color.green, 1.0d);
 
-		/* Its local space */
-		drawVector(g2d, forward, Color.cyan, 20.0d);
-		drawVector(g2d, side, Color.cyan, 20.0d);
+			/* Its local space */
+			drawVector(g2d, forward, Color.cyan, 20.0d);
+			drawVector(g2d, side, Color.cyan, 20.0d);
 
-		/* Its future position and the corresponding point on the road */
-		drawPoint(g2d, futurePosition, Color.orange, 8.0d);
+			/* Its future position */
+			drawPoint(g2d, futurePosition, Color.orange, 8.0d);
+		}
 
 		/* Its name */
 		g2d.setPaint(Color.white);

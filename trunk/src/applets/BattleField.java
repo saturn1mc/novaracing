@@ -39,7 +39,7 @@ public class BattleField extends Applet implements Runnable, MouseListener, Mous
 
 	public void init() {
 		super.init();
-		
+
 		wxsize = WXSIZE; // size in pixels
 		wysize = (int) (MAXY / scale); // The y axe is automatically computed
 
@@ -63,13 +63,13 @@ public class BattleField extends Applet implements Runnable, MouseListener, Mous
 	public void initBots() {
 		leader = new Leader("Nova", new Point2d(0, 0), Leader.FORMATION_SQUARE);
 		followers = new LinkedList<Follower>();
-		
+
 		Random random = new Random();
-		
-		for(int i = 0; i < 9; i++){
+
+		for (int i = 0; i < 9; i++) {
 			Follower f = new Follower("Soldier_" + i, new Point2d(random.nextInt(200), random.nextInt(200)));
 			followers.add(f);
-			
+
 			f.setLeader(leader);
 			leader.registerFollower(f);
 		}
@@ -124,7 +124,7 @@ public class BattleField extends Applet implements Runnable, MouseListener, Mous
 
 		updateBots();
 		drawBots(canvasG);
-		
+
 		canvasG.setColor(Color.black);
 		canvasG.drawRect(0, 0, wxsize - 1, wysize - 1);
 
@@ -149,16 +149,16 @@ public class BattleField extends Applet implements Runnable, MouseListener, Mous
 	// Update bots positions and
 	public void updateBots() {
 		leader.update(this);
-		
-		for(Follower f : followers){
+
+		for (Follower f : followers) {
 			f.update(this);
 		}
 	}
-	
-	public void drawBots(Graphics g){
+
+	public void drawBots(Graphics g) {
 		leader.draw((Graphics2D) g);
-		
-		for(Follower f : followers){
+
+		for (Follower f : followers) {
 			f.draw((Graphics2D) g);
 		}
 	}
@@ -176,8 +176,8 @@ public class BattleField extends Applet implements Runnable, MouseListener, Mous
 	public BattleField() {
 		scale = MAXX / WXSIZE;
 	}
-	
-	public Surface getSurface(){
+
+	public Surface getSurface() {
 		return surface;
 	}
 
@@ -210,38 +210,37 @@ public class BattleField extends Applet implements Runnable, MouseListener, Mous
 	}
 
 	public void mouseReleased(MouseEvent e) {
-		pointA.x = e.getX();
-		pointA.y = e.getY();
 	}
 
 	public void mouseDragged(MouseEvent e) {
 	}
 
 	public void mouseMoved(MouseEvent e) {
-		if (pointA.x > -1) { // pointA has been defined
-			pointB.x = e.getX();
-			pointB.y = e.getY();
 
-			Path path = surface.solve(pointA, pointB);
-			
-			if(path != null){
-				leader.setTarget(path.getPoints().getFirst());
-			}
-			
-			repaint();
+		pointA.x = leader.getPosition().x;
+		pointA.y = leader.getPosition().y;
+
+		pointB.x = e.getX();
+		pointB.y = e.getY();
+
+		Path path = surface.solve(pointA, pointB);
+
+		if (path != null) {
+			leader.setTarget(path.getPoints().getFirst());
 		}
+
+		repaint();
 	}
 
 	@Override
 	public void keyPressed(KeyEvent e) {
-		if(e.getKeyCode() == KeyEvent.VK_S){
+		if (e.getKeyCode() == KeyEvent.VK_S) {
 			//Square formation
 			leader.setFormation(Leader.FORMATION_SQUARE);
 		}
-		
-		if(e.getKeyCode() == KeyEvent.VK_L){
+
+		if (e.getKeyCode() == KeyEvent.VK_L) {
 			//Line formation
-			System.out.println("La");
 			leader.setFormation(Leader.FORMATION_LINE);
 		}
 	}
@@ -249,12 +248,12 @@ public class BattleField extends Applet implements Runnable, MouseListener, Mous
 	@Override
 	public void keyReleased(KeyEvent e) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void keyTyped(KeyEvent e) {
 		// TODO Auto-generated method stub
-		
+
 	}
 }
