@@ -154,18 +154,10 @@ public class Follower extends Bot {
 	 */
 	private void updateForces() {
 
-		/* Changing target */
-		if (leader != null) {
-			speed = getArrivalSpeed();
-
-		} else {
-			speed = 0;
-		}
-
 		/* Correcting current steering */
 		steering.add(truncate(correction, maxForce));
 		steering.normalize();
-
+		
 		/* Computing acceleration */
 		Vector2d steeringForce = new Vector2d(truncate(steering, maxForce));
 		Vector2d acceleration = new Vector2d(steeringForce);
@@ -226,7 +218,7 @@ public class Follower extends Bot {
 						avoidanceCorrection = new Vector2d(-side.x, -side.y);
 					}
 
-					avoidanceCorrection.scale(intersection.getWidth() * 2);
+					avoidanceCorrection.scale(intersection.getWidth() * radius * 2.0);
 					correction.add(avoidanceCorrection);
 				}
 			}
@@ -247,9 +239,9 @@ public class Follower extends Bot {
 	private double getArrivalSpeed() {
 		Vector2d targetOffset = new Vector2d(target.x - futurePosition.x, target.y - futurePosition.y);
 		double distance = targetOffset.length();
-
+		
 		if (distance > radius) {
-			double rampedSpeed = maxSpeed * (distance / radius);
+			double rampedSpeed = maxSpeed * (distance / (radius*2.0));
 			double clippedSpeed = Math.min(rampedSpeed, maxSpeed);
 
 			return clippedSpeed;

@@ -26,6 +26,7 @@ public class Leader extends Bot {
 	public static final int FORMATION_NONE = 0;
 	public static final int FORMATION_LINE = 1;
 	public static final int FORMATION_SQUARE = 2;
+	public static final int FORMATION_WING = 3;
 
 	/**
 	 * Vehicle's radius
@@ -172,11 +173,9 @@ public class Leader extends Bot {
 	 */
 	private void updateForces() {
 
-		/* Changing target */
+		/* Going to target */
 		if (target != null) {
-
 			speed = maxSpeed;
-
 		} else {
 			speed = 0;
 		}
@@ -245,7 +244,7 @@ public class Leader extends Bot {
 						avoidanceCorrection = new Vector2d(-side.x, -side.y);
 					}
 
-					avoidanceCorrection.scale(intersection.getWidth() * 2);
+					avoidanceCorrection.scale(intersection.getWidth() * radius * 2.0);
 					correction.add(avoidanceCorrection);
 				}
 			}
@@ -323,16 +322,17 @@ public class Leader extends Bot {
 	public synchronized Point2d getTargetFor(Follower f) {
 
 		Point2d target;
-
+		int id = getFollowerId(f);
+		int followersNumber = getFollowersNumber();
+		
 		switch (formation) {
 		case FORMATION_NONE:
 			target = this.position;
 			break;
 
 		case FORMATION_SQUARE:
-			int squareSize = (int) Math.sqrt(getFollowersNumber());
+			int squareSize = (int) Math.sqrt(followersNumber);
 
-			int id = getFollowerId(f);
 			int column = (id - 1) % squareSize;
 			int line = (id - 1) / squareSize;
 
@@ -343,7 +343,27 @@ public class Leader extends Bot {
 			break;
 
 		case FORMATION_LINE:
-			target = new Point2d(this.position.x + (this.forward.x * -(radius * 2.0 * getFollowerId(f))), this.position.y + (this.forward.y * -(radius * 2.0 * getFollowerId(f))));
+			target = new Point2d(this.position.x + (this.forward.x * -(radius * 2.0 * id)), this.position.y + (this.forward.y * -(radius * 2.0 * id)));
+			break;
+			
+		case FORMATION_WING:
+			
+			int followersPerWing = followersNumber / 2;
+			int pos = ((id-1) % followersPerWing) + 1;
+			
+			if(id <= followersPerWing){
+				Vector2d leftWingDir = new Vector2d((forward.x * Math.cos(Math.PI )) - (forward.y * Math.sin(Math.PI * 0.9d)), (forward.y * Math.cos(Math.PI * 0.9d)) + (forward.x * Math.sin(Math.PI * 0.9d)));
+				leftWingDir.normalize();
+				
+				target = new Point2d(this.position.x + (leftWingDir.x * (pos * radius * 2.0)), this.position.y + (leftWingDir.y * (pos * radius * 2.0)));
+			}
+			else{
+				Vector2d rightWingDir = new Vector2d((forward.x * Math.cos(-Math.PI * 0.9d)) - (forward.y * Math.sin(-Math.PI * 0.9d)), (forward.y * Math.cos(-Math.PI * 0.9d)) + (forward.x * Math.sin(-Math.PI * 0.9d)));
+				rightWingDir.normalize();
+				
+				target = new Point2d(this.position.x + (rightWingDir.x * (pos * radius * 2.0)), this.position.y + (rightWingDir.y * (pos * radius * 2.0)));
+			}
+			
 			break;
 
 		default:
