@@ -7,6 +7,8 @@ import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -20,7 +22,7 @@ import aStar.Path;
 import bots.Follower;
 import bots.Leader;
 
-public class BattleField extends Applet implements Runnable, MouseListener, MouseMotionListener {
+public class BattleField extends Applet implements Runnable, MouseListener, MouseMotionListener, KeyListener {
 	/**
 	 * 
 	 */
@@ -48,6 +50,7 @@ public class BattleField extends Applet implements Runnable, MouseListener, Mous
 
 		addMouseListener(this);
 		addMouseMotionListener(this);
+		addKeyListener(this);
 
 		initSurface();
 		initBots();
@@ -58,12 +61,12 @@ public class BattleField extends Applet implements Runnable, MouseListener, Mous
 	}
 
 	public void initBots() {
-		leader = new Leader("Nova", new Point2d(0, 0), Leader.FORMATION_LINE);
+		leader = new Leader("Nova", new Point2d(0, 0), Leader.FORMATION_SQUARE);
 		followers = new LinkedList<Follower>();
 		
 		Random random = new Random();
 		
-		for(int i = 0; i < 10; i++){
+		for(int i = 0; i < 9; i++){
 			Follower f = new Follower("Soldier_" + i, new Point2d(random.nextInt(200), random.nextInt(200)));
 			followers.add(f);
 			
@@ -227,5 +230,31 @@ public class BattleField extends Applet implements Runnable, MouseListener, Mous
 			
 			repaint();
 		}
+	}
+
+	@Override
+	public void keyPressed(KeyEvent e) {
+		if(e.getKeyCode() == KeyEvent.VK_S){
+			//Square formation
+			leader.setFormation(Leader.FORMATION_SQUARE);
+		}
+		
+		if(e.getKeyCode() == KeyEvent.VK_L){
+			//Line formation
+			System.out.println("La");
+			leader.setFormation(Leader.FORMATION_LINE);
+		}
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void keyTyped(KeyEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 }
