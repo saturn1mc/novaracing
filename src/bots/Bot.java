@@ -18,6 +18,8 @@ import elements.Vehicle;
  */
 public abstract class Bot {
 	
+	public static final boolean showForces = false;
+	
 	/**
 	 * The element's name (could be used as an identifier)
 	 */
