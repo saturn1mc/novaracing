@@ -40,7 +40,7 @@ public class Leader extends Bot {
 	/**
 	 * Vehicle's maximum speed
 	 */
-	private static final double maxSpeed = 0.5d;
+	private static final double maxSpeed = 1.0d;
 
 	/**
 	 * Vehicle's current speed

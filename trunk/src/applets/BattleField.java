@@ -105,7 +105,7 @@ public class BattleField extends Applet implements Runnable, MouseListener, Mous
 		do {
 			repaint();
 			try {
-				Thread.sleep(33);
+				Thread.sleep(10);
 			} catch (InterruptedException _ex) {
 			}
 		} while (true);
