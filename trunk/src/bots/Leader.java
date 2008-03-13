@@ -27,6 +27,8 @@ public class Leader extends Bot {
 	public static final int FORMATION_LINE = 1;
 	public static final int FORMATION_SQUARE = 2;
 	public static final int FORMATION_WING = 3;
+	public static final int FORMATION_SHIELD = 4;
+	public static final int FORMATION_SPIRAL = 5;
 
 	/**
 	 * Vehicle's radius
@@ -103,7 +105,7 @@ public class Leader extends Bot {
 	 */
 	private LinkedList<Follower> followers;
 
-	private int formation;
+	private int formationOrder;
 
 	/**
 	 * Damages
@@ -130,7 +132,7 @@ public class Leader extends Bot {
 		this.correction = new Vector2d(0, 0);
 
 		this.followers = new LinkedList<Follower>();
-		this.formation = formation;
+		this.formationOrder = formation;
 	}
 
 	@Override
@@ -303,8 +305,8 @@ public class Leader extends Bot {
 		steering.normalize();
 	}
 
-	public void setFormation(int formation) {
-		this.formation = formation;
+	public void setFormationOrder(int order) {
+		this.formationOrder = order;
 	}
 
 	public synchronized void registerFollower(Follower f) {
@@ -322,10 +324,12 @@ public class Leader extends Bot {
 	public synchronized Point2d getTargetFor(Follower f) {
 
 		Point2d target;
+		Point2d reference;
 		int id = getFollowerId(f);
 		int followersNumber = getFollowersNumber();
 		
-		switch (formation) {
+		switch (formationOrder) {
+		
 		case FORMATION_NONE:
 			target = this.position;
 			break;
@@ -336,7 +340,7 @@ public class Leader extends Bot {
 			int column = (id - 1) % squareSize;
 			int line = (id - 1) / squareSize;
 
-			Point2d reference = new Point2d(this.position.x + (this.forward.x * (-radius * 2.0)) + (this.side.x * -(radius * 2.0) * (squareSize / 2)), this.position.y + (this.forward.y * -(radius * 2.0))
+			reference = new Point2d(this.position.x + (this.forward.x * (-radius * 2.0)) + (this.side.x * -(radius * 2.0) * (squareSize / 2)), this.position.y + (this.forward.y * -(radius * 2.0))
 					+ (this.side.y * -(radius * 2.0) * (squareSize / 2)));
 			target = new Point2d(reference.x + (this.side.x * (radius * 2.0 * column)) + (this.forward.x * -(radius * 2.0 * line)), reference.y + (this.side.y * (radius * 2.0 * column)) + (this.forward.y * -(radius * 2.0 * line)));
 
@@ -348,22 +352,38 @@ public class Leader extends Bot {
 			
 		case FORMATION_WING:
 			
-			int followersPerWing = followersNumber / 2;
-			int pos = ((id-1) % followersPerWing) + 1;
+			int leftWingLimit = (followersNumber / 2);
+			int dist = (id % (followersNumber-leftWingLimit));
 			
-			if(id <= followersPerWing){
+			reference = new Point2d(this.position.x - (forward.x * 2.0 * radius), this.position.y - (forward.y * 2.0 * radius));
+			
+			if(id <= leftWingLimit){
 				Vector2d leftWingDir = new Vector2d((forward.x * Math.cos(Math.PI )) - (forward.y * Math.sin(Math.PI * 0.9d)), (forward.y * Math.cos(Math.PI * 0.9d)) + (forward.x * Math.sin(Math.PI * 0.9d)));
 				leftWingDir.normalize();
 				
-				target = new Point2d(this.position.x + (leftWingDir.x * (pos * radius * 2.0)), this.position.y + (leftWingDir.y * (pos * radius * 2.0)));
+				target = new Point2d(reference.x + (leftWingDir.x * (dist * radius * 2.0)), reference.y + (leftWingDir.y * (dist * radius * 2.0)));
 			}
 			else{
 				Vector2d rightWingDir = new Vector2d((forward.x * Math.cos(-Math.PI * 0.9d)) - (forward.y * Math.sin(-Math.PI * 0.9d)), (forward.y * Math.cos(-Math.PI * 0.9d)) + (forward.x * Math.sin(-Math.PI * 0.9d)));
 				rightWingDir.normalize();
 				
-				target = new Point2d(this.position.x + (rightWingDir.x * (pos * radius * 2.0)), this.position.y + (rightWingDir.y * (pos * radius * 2.0)));
+				target = new Point2d(reference.x + (rightWingDir.x * (dist * radius * 2.0)), reference.y + (rightWingDir.y * (dist * radius * 2.0)));
 			}
 			
+			break;
+			
+		case FORMATION_SHIELD:
+			
+			double shieldRadius = (followersNumber * 2.0 * radius) / (2.0 * Math.PI);
+			double rotation = (id-1) * ((2.0d * Math.PI) / followersNumber);
+			Vector2d dir = new Vector2d((forward.x * Math.cos(rotation)) - (forward.y * Math.sin(rotation)), (forward.y * Math.cos(rotation)) + (forward.x * Math.sin(rotation)));
+			
+			target = new Point2d(this.position.x + (dir.x * shieldRadius), this.position.y + (dir.y * shieldRadius));
+			
+			break;
+			
+		case FORMATION_SPIRAL:
+			target = this.position;
 			break;
 
 		default:
@@ -425,11 +445,11 @@ public class Leader extends Bot {
 
 			/* Its future position */
 			drawPoint(g2d, futurePosition, Color.orange, 8.0d);
+			
+			/* Its name */
+			g2d.setPaint(Color.white);
+			g2d.drawString(name, (float) (position.x + radius), (float) position.y);
 		}
-
-		/* Its name */
-		g2d.setPaint(Color.white);
-		g2d.drawString(name, (float) (position.x + radius), (float) position.y);
 	}
 
 	/**

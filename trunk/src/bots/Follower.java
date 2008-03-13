@@ -237,17 +237,17 @@ public class Follower extends Bot {
 	}
 
 	private double getArrivalSpeed() {
-		Vector2d targetOffset = new Vector2d(target.x - futurePosition.x, target.y - futurePosition.y);
+		Vector2d targetOffset = new Vector2d(target.x - position.x, target.y - position.y);
 		double distance = targetOffset.length();
 		
-		if (distance > radius) {
-			double rampedSpeed = maxSpeed * (distance / (radius*2.0));
-			double clippedSpeed = Math.min(rampedSpeed, maxSpeed);
-
-			return clippedSpeed;
-		} else {
-			return 0;
+		double rampedSpeed = maxSpeed * (distance / (radius*4.0));
+		double clippedSpeed = Math.min(rampedSpeed, maxSpeed);
+		
+		if(clippedSpeed < 0.01){
+			clippedSpeed = 0;
 		}
+		
+		return clippedSpeed;
 	}
 
 	private Vector2d truncate(Vector2d v, double max) {
@@ -345,11 +345,11 @@ public class Follower extends Bot {
 
 			/* Its future position */
 			drawPoint(g2d, futurePosition, Color.orange, 8.0d);
+			
+			/* Its name */
+			g2d.setPaint(Color.white);
+			g2d.drawString(name, (float) (position.x + radius), (float) position.y);
 		}
-
-		/* Its name */
-		g2d.setPaint(Color.white);
-		g2d.drawString(name, (float) (position.x + radius), (float) position.y);
 	}
 
 	/**
