@@ -1,14 +1,15 @@
 /**
  * 
  */
-package environment;
+package nova.environment;
 
 import java.awt.Graphics2D;
 import java.util.LinkedList;
 
-import elements.Element;
-import elements.Obstacle;
-import elements.Vehicle;
+import nova.elements.Element;
+import nova.elements.Obstacle;
+import nova.elements.Vehicle;
+
 
 /**
  * @author camille

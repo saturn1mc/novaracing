@@ -1,7 +1,7 @@
 /**
  * 
  */
-package environment;
+package nova.environment;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -10,7 +10,8 @@ import java.awt.Polygon;
 import java.awt.Stroke;
 import java.util.LinkedList;
 
-import elements.Waypoint;
+import nova.elements.Waypoint;
+
 
 /**
  * @author camille

@@ -21,6 +21,9 @@ import battlefield.surface.Waypoint;
  */
 public class Leader extends Bot {
 
+	public static final int STATE_SEARCHING = 0;
+	public static final int STATE_ATTACKING = 1;
+	
 	public static final int FORMATION_NONE = 0;
 	public static final int FORMATION_LINE = 1;
 	public static final int FORMATION_SQUARE = 2;
@@ -107,6 +110,11 @@ public class Leader extends Bot {
 	 * Latest registered follower
 	 */
 	private LinkedList<Follower> followers;
+	
+	/**
+	 * Bot's enemies
+	 */
+	private LinkedList<Bot> enemies;
 
 	private int formationOrder;
 
@@ -114,13 +122,21 @@ public class Leader extends Bot {
 	 * Damages
 	 */
 	private double damages;
+	
+	/**
+	 * Bot's current state
+	 */
+	private int currentState;
 
 	/**
-	 * Current bonus element
+	 * Bot's color
 	 */
-	// private Element bonus;
-	public Leader(String name, Point2d position, int formation) {
+	private Color color;
+	
+	public Leader(String name, Point2d position, Color color, int formation) {
 		super(name, position);
+
+		this.color = color;
 
 		this.forward = new Vector2d(0, 0);
 		this.side = new Vector2d(0, 0);
@@ -134,8 +150,11 @@ public class Leader extends Bot {
 
 		this.correction = new Vector2d(0, 0);
 
+		this.enemies = new LinkedList<Bot>();
 		this.followers = new LinkedList<Follower>();
 		this.formationOrder = formation;
+
+		this.currentState = STATE_SEARCHING;
 	}
 
 	@Override
@@ -331,6 +350,10 @@ public class Leader extends Bot {
 	public synchronized int getFollowersNumber() {
 		return followers.size();
 	}
+	
+	public void addEnemies(LinkedList<Bot> enemies){
+		this.enemies.addAll(enemies);
+	}
 
 	public synchronized Point2d getTargetFor(Follower f) {
 
@@ -422,7 +445,7 @@ public class Leader extends Bot {
 	public void draw(Graphics2D g2d) {
 
 		/* The vehicle */
-		g2d.setPaint(Color.red);
+		g2d.setPaint(color);
 		g2d.drawOval((int) (position.x - (radius / 2.0d)), (int) (position.y - (radius / 2.0d)), (int) radius, (int) radius);
 		g2d.fillOval((int) (position.x - (radius / 2.0d)), (int) (position.y - (radius / 2.0d)), (int) radius, (int) radius);
 
