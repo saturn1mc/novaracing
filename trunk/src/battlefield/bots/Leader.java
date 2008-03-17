@@ -13,10 +13,7 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
 import battlefield.BattleField;
-
-import elements.HumanVehicle;
-import elements.Vehicle;
-import elements.Waypoint;
+import battlefield.surface.Waypoint;
 
 /**
  * @author camille
@@ -415,19 +412,6 @@ public class Leader extends Bot {
 	@Override
 	public double getRadius() {
 		return radius;
-	}
-
-	/* ------------------------- */
-	/* --- Avoidance --- */
-	/* ------------------------- */
-	@Override
-	public boolean avoidedBy(Vehicle vehicle) {
-		return true;
-	}
-
-	@Override
-	public boolean avoidedBy(HumanVehicle vehicle) {
-		return true;
 	}
 
 	/* ------------------------- */
