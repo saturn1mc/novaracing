@@ -14,9 +14,6 @@ import battlefield.aStar.Path;
 
 public class Surface {
 
-	public static int MARGIN = 1;
-	public static int BORDER_SIZE = 2;
-
 	private Rectangle area;
 	private LinkedList<Polygon> objects; // The objects on the surface
 	private Graph graph;

@@ -31,7 +31,6 @@ public class Leader extends Bot {
 	public static final int FORMATION_SQUARE = 2;
 	public static final int FORMATION_WING = 3;
 	public static final int FORMATION_SHIELD = 4;
-	public static final int FORMATION_SPIRAL = 5;
 
 	/**
 	 * Vehicle's radius
@@ -203,6 +202,8 @@ public class Leader extends Bot {
 		switch (currentState) {
 
 		case STATE_SEARCHING:
+			
+			formationOrder = FORMATION_SQUARE;
 
 			if (target == null) {
 
@@ -244,6 +245,7 @@ public class Leader extends Bot {
 		case STATE_ATTACKING:
 
 			enemy = enemyAtSight(env);
+			formationOrder = FORMATION_WING;
 
 			if (enemy != null) {
 				currentState = STATE_ATTACKING;
@@ -260,6 +262,7 @@ public class Leader extends Bot {
 
 		case STATE_ESCAPING:
 
+			formationOrder = FORMATION_LINE;
 			enemy = enemyAtSight(env);
 
 			if (enemy != null) {
@@ -359,20 +362,20 @@ public class Leader extends Bot {
 				
 				Vector2d containmentCorrection = new Vector2d(0, 0);
 
-				if (futurePosition.x < 0) {
-					containmentCorrection.set(-futurePosition.x, containmentCorrection.y);
+				if (futurePosition.x < (2.0d * radius)) {
+					containmentCorrection.set(futurePosition.x - (2.0d * radius), containmentCorrection.y);
 				}
 
-				if (futurePosition.y < 0) {
-					containmentCorrection.set(containmentCorrection.x, -futurePosition.y);
+				if (futurePosition.y < (2.0d * radius)) {
+					containmentCorrection.set(containmentCorrection.x, futurePosition.y - (2.0d * radius));
 				}
 
-				if (futurePosition.x > env.getSurface().getArea().width) {
-					containmentCorrection.set(futurePosition.x - env.getSurface().getArea().width, containmentCorrection.y);
+				if (futurePosition.x > env.getSurface().getArea().width - (2.0d * radius)) {
+					containmentCorrection.set(futurePosition.x - env.getSurface().getArea().width + (2.0d * radius), containmentCorrection.y);
 				}
 
-				if (futurePosition.y > env.getSurface().getArea().height) {
-					containmentCorrection.set(containmentCorrection.x, futurePosition.y - env.getSurface().getArea().height);
+				if (futurePosition.y > env.getSurface().getArea().height - (2.0d * radius)) {
+					containmentCorrection.set(containmentCorrection.x, futurePosition.y - env.getSurface().getArea().height + (2.0d * radius));
 				}
 
 				correction.sub(containmentCorrection);
@@ -381,7 +384,7 @@ public class Leader extends Bot {
 			}
 
 			/*
-			 * Corrections to avoid obstacles and other vehicles
+			 * Corrections to avoid obstacles
 			 */
 			if (!avoiding) {
 				for (Polygon p : env.getSurface().getObjects()) {
@@ -553,10 +556,6 @@ public class Leader extends Bot {
 
 			target = new Point2d(this.position.x + (dir.x * shieldRadius), this.position.y + (dir.y * shieldRadius));
 
-			break;
-
-		case FORMATION_SPIRAL:
-			target = this.position;
 			break;
 
 		default:

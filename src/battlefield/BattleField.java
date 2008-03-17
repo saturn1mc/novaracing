@@ -26,7 +26,7 @@ import battlefield.weapons.Weapon;
 
 public class BattleField extends Applet implements Runnable, MouseListener, MouseMotionListener, KeyListener {
 	/**
-	 * 
+	 * Generated SVUID
 	 */
 	private static final long serialVersionUID = 1L;
 
