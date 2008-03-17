@@ -89,18 +89,18 @@ public class BattleField extends Applet implements Runnable, MouseListener, Mous
 		redTeam.add(redLeader);
 
 		for (int i = 0; i < TEAM_SIZE; i++) {
-			Follower f = new Follower("Red_" + i, new Point2d(random.nextInt(200), random.nextInt(200)), Color.red);
+			Follower f = new Follower("Red_" + i, new Point2d(50 + random.nextInt((int)Follower.radius * 2), 50 + random.nextInt((int)Follower.radius * 2)), Color.red);
 			f.setLeader(redLeader);
 			redLeader.registerFollower(f);
 			redTeam.add(f);
 		}
 
 		//Blue team
-		blueLeader = new Leader("BlueLeader", new Point2d(random.nextInt(400), random.nextInt(400)), Color.blue, Leader.FORMATION_SQUARE);
+		blueLeader = new Leader("BlueLeader", new Point2d(500, 500), Color.blue, Leader.FORMATION_SQUARE);
 		blueTeam.add(blueLeader);
 		
 		for (int i = 0; i < TEAM_SIZE; i++) {
-			Follower f = new Follower("Blue_" + i, new Point2d(random.nextInt(200), random.nextInt(200)), Color.blue);
+			Follower f = new Follower("Blue_" + i, new Point2d(500 + random.nextInt((int)Follower.radius * 2), 500 + random.nextInt((int)Follower.radius * 2)), Color.blue);
 			
 			f.setLeader(blueLeader);
 			blueLeader.registerFollower(f);
