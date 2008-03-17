@@ -3,7 +3,6 @@
  */
 package battlefield.surface;
 
-import java.awt.Color;
 import java.awt.Graphics2D;
 
 import javax.vecmath.Point2d;
