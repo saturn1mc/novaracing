@@ -1,13 +1,14 @@
 /**
  * 
  */
-package bots;
+package battlefield.bots;
 
 import java.awt.Graphics2D;
 
 import javax.vecmath.Point2d;
 
-import applets.BattleField;
+import battlefield.BattleField;
+
 
 import elements.HumanVehicle;
 import elements.Vehicle;
@@ -21,12 +22,15 @@ public abstract class Bot {
 	public static final boolean showForces = false;
 	
 	/**
-	 * The element's name (could be used as an identifier)
+	 * The bot's name (could be used as an identifier)
 	 */
 	protected String name;
 	
+	protected double life;
+	protected int ammo;
+	
 	/**
-	 * The element's absolute position in the window
+	 * The bot's absolute position in the window
 	 */
 	protected Point2d position;
 	
@@ -37,13 +41,13 @@ public abstract class Bot {
 	}
 
 	/**
-	 * Draws the element
+	 * Draws the bot
 	 * @param g2d
 	 */
 	public void draw(Graphics2D g2d){}
 	
 	/**
-	 * Update the element on each frame
+	 * Update the bot on each frame
 	 * @param env
 	 */
 	public void update(BattleField env){}
@@ -69,14 +73,14 @@ public abstract class Bot {
 	/**
 	 * Avoidance indicator for a {@link Vehicle}
 	 * @param vehicle
-	 * @return <code>true</code> if the element must be avoided or else false
+	 * @return <code>true</code> if the bot must be avoided or else false
 	 */
 	public boolean avoidedBy(Vehicle vehicle){return false;}
 	
 	/**
 	 * Avoidance indicator for a {@link HumanVehicle}
 	 * @param vehicle
-	 * @return <code>true</code> if the element must be avoided or else false
+	 * @return <code>true</code> if the bot must be avoided or else false
 	 */
 	public boolean avoidedBy(HumanVehicle vehicle){return false;}
 	

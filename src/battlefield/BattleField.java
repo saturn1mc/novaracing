@@ -1,4 +1,4 @@
-package applets;
+package battlefield;
 
 import java.applet.Applet;
 import java.awt.Color;
@@ -17,10 +17,11 @@ import java.util.Random;
 
 import javax.vecmath.Point2d;
 
-import surface.Surface;
-import aStar.Path;
-import bots.Follower;
-import bots.Leader;
+import battlefield.aStar.Path;
+import battlefield.surface.Surface;
+
+import Battlefield.bots.Follower;
+import Battlefield.bots.Leader;
 
 public class BattleField extends Applet implements Runnable, MouseListener, MouseMotionListener, KeyListener {
 	/**
@@ -32,7 +33,7 @@ public class BattleField extends Applet implements Runnable, MouseListener, Mous
 	private Leader leader;
 	private LinkedList<Follower> followers;
 
-	public static final int NB_FOLLOWERS = 100;
+	public static final int NB_FOLLOWERS = 9;
 	
 	public static final float MAXX = 10000F; // Size of the battlefield, in
 	// float (not pixels)

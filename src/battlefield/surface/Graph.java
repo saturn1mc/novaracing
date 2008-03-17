@@ -1,7 +1,7 @@
 /**
  * 
  */
-package surface;
+package battlefield.surface;
 
 import java.awt.Polygon;
 import java.util.Hashtable;

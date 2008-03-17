@@ -1,7 +1,7 @@
 /**
  * 
  */
-package bots;
+package battlefield.bots;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -11,7 +11,8 @@ import java.awt.Rectangle;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
-import applets.BattleField;
+import battlefield.BattleField;
+
 import elements.HumanVehicle;
 import elements.Vehicle;
 

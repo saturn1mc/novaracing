@@ -1,4 +1,4 @@
-package aStar;
+package battlefield.aStar;
 
 import java.util.Hashtable;
 

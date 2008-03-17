@@ -9,7 +9,7 @@ import java.awt.Graphics2D;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
-import bots.Bot;
+import Battlefield.bots.Bot;
 
 /**
  * @author camille
@@ -47,18 +47,6 @@ public class Waypoint extends Element {
 	 *         {@link Waypoint}, or else <code>false</code>
 	 */
 	public boolean isReachedBy(Element element) {
-		Vector2d dist = new Vector2d(position.x - element.getPosition().x, position.y - element.getPosition().y);
-		return (dist.length() <= radius);
-	}
-	
-	/**
-	 * Indicates if a bot as reached the {@link Waypoint}
-	 * 
-	 * @param vehicle
-	 * @return <code>true</code> if the element as reached the
-	 *         {@link Waypoint}, or else <code>false</code>
-	 */
-	public boolean isReachedBy(Bot element) {
 		Vector2d dist = new Vector2d(position.x - element.getPosition().x, position.y - element.getPosition().y);
 		return (dist.length() <= radius);
 	}
