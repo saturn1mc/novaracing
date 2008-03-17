@@ -21,18 +21,28 @@ public class Bullet extends Element{
 
 	public static double radius = 2.0;
 	
-	private double velocity;
 	private Vector2d dir;
+	private double maxRange;
+	private double range;
 	
-	public Bullet(String name, Point2d position, Vector2d dir, double velocity) {
-		super(name, position);
+	public Bullet(Point2d position, Vector2d dir, double velocity, double maxRange) {
+		super("Bullet", position);
+		
 		this.dir = dir;
-		this.velocity = velocity;
+		this.dir.scale(velocity);
+		
+		this.maxRange = maxRange;
+		this.range = 0;
+	}
+	
+	public boolean isFlying(){
+		return range <= maxRange;
 	}
 	
 	@Override
 	public void update(BattleField env) {
-		
+		range += dir.length();
+		this.position.add(dir);
 	}
 
 	@Override

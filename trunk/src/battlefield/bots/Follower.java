@@ -11,11 +11,7 @@ import java.awt.Rectangle;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
-import nova.elements.HumanVehicle;
-import nova.elements.Vehicle;
-
 import battlefield.BattleField;
-
 
 /**
  * @author camille
@@ -103,10 +99,10 @@ public class Follower extends Bot {
 	 * Bot's color
 	 */
 	private Color color;
-	
+
 	public Follower(String name, Point2d position, Color color) {
 		super(name, position);
-		
+
 		this.color = color;
 
 		this.forward = new Vector2d(0, 0);
@@ -162,7 +158,7 @@ public class Follower extends Bot {
 		/* Correcting current steering */
 		steering.add(truncate(correction, maxForce));
 		steering.normalize();
-		
+
 		/* Computing acceleration */
 		Vector2d steeringForce = new Vector2d(truncate(steering, maxForce));
 		Vector2d acceleration = new Vector2d(steeringForce);
@@ -197,34 +193,64 @@ public class Follower extends Bot {
 			boolean avoiding = false;
 
 			/*
+			 * Correction to avoid exiting the area
+			 */
+			if (!env.getSurface().getArea().contains(futurePosition.x, futurePosition.y)) {
+				
+				Vector2d containmentCorrection = new Vector2d(0,0);
+				
+				if(futurePosition.x < 0){
+					containmentCorrection.set(- futurePosition.x, containmentCorrection.y);
+				}
+				
+				if(futurePosition.y < 0){
+					containmentCorrection.set(containmentCorrection.x, -futurePosition.y);
+				}
+				
+				if(futurePosition.x > env.getSurface().getArea().width){
+					containmentCorrection.set(futurePosition.x - env.getSurface().getArea().width, containmentCorrection.y);
+				}
+				
+				if(futurePosition.y > env.getSurface().getArea().height){
+					containmentCorrection.set(containmentCorrection.x, futurePosition.y - env.getSurface().getArea().height);
+				}
+				
+				correction.sub(containmentCorrection);
+				
+				avoiding = true;
+			}
+
+			/*
 			 * Corrections to avoid obstacles and other vehicles
 			 */
-			for (Polygon p : env.getSurface().getObjects()) {
+			if (!avoiding) {
+				for (Polygon p : env.getSurface().getObjects()) {
 
-				Rectangle bbox = p.getBounds();
-				Rectangle intersection = bbox.intersection(sight.getBounds());
+					Rectangle bbox = p.getBounds();
+					Rectangle intersection = bbox.intersection(sight.getBounds());
 
-				/* If the element is on the way */
-				if (!intersection.isEmpty()) {
+					/* If the element is on the way */
+					if (!intersection.isEmpty()) {
 
-					avoiding = true;
+						avoiding = true;
 
-					Point2d A = position;
-					Point2d B = futurePosition;
+						Point2d A = position;
+						Point2d B = futurePosition;
 
-					double L = Math.sqrt(((B.x - A.x) * (B.x - A.x)) + ((B.y - A.y) * (B.y - A.y)));
-					double S = (((A.y - bbox.getCenterY()) * (B.x - A.x)) - ((A.x - bbox.getCenterX()) * (B.y - A.y))) / (L * L);
+						double L = Math.sqrt(((B.x - A.x) * (B.x - A.x)) + ((B.y - A.y) * (B.y - A.y)));
+						double S = (((A.y - bbox.getCenterY()) * (B.x - A.x)) - ((A.x - bbox.getCenterX()) * (B.y - A.y))) / (L * L);
 
-					Vector2d avoidanceCorrection;
+						Vector2d avoidanceCorrection;
 
-					if (S > 0) {
-						avoidanceCorrection = new Vector2d(side.x, side.y);
-					} else {
-						avoidanceCorrection = new Vector2d(-side.x, -side.y);
+						if (S > 0) {
+							avoidanceCorrection = new Vector2d(side.x, side.y);
+						} else {
+							avoidanceCorrection = new Vector2d(-side.x, -side.y);
+						}
+
+						avoidanceCorrection.scale(intersection.getWidth() * radius * 2.0);
+						correction.add(avoidanceCorrection);
 					}
-
-					avoidanceCorrection.scale(intersection.getWidth() * radius * 2.0);
-					correction.add(avoidanceCorrection);
 				}
 			}
 
@@ -244,14 +270,14 @@ public class Follower extends Bot {
 	private double getArrivalSpeed() {
 		Vector2d targetOffset = new Vector2d(target.x - position.x, target.y - position.y);
 		double distance = targetOffset.length();
-		
-		double rampedSpeed = maxSpeed * (distance / (radius*4.0));
+
+		double rampedSpeed = maxSpeed * (distance / (radius * 4.0));
 		double clippedSpeed = Math.min(rampedSpeed, maxSpeed);
-		
-		if(clippedSpeed < 0.01){
+
+		if (clippedSpeed < 0.01) {
 			clippedSpeed = 0;
 		}
-		
+
 		return clippedSpeed;
 	}
 
@@ -309,26 +335,13 @@ public class Follower extends Bot {
 	}
 
 	/* ------------------------- */
-	/* --- Avoidance --- */
-	/* ------------------------- */
-	@Override
-	public boolean avoidedBy(Vehicle vehicle) {
-		return true;
-	}
-
-	@Override
-	public boolean avoidedBy(HumanVehicle vehicle) {
-		return true;
-	}
-
-	/* ------------------------- */
 	/* --- Drawing functions --- */
 	/* ------------------------- */
 
 	@Override
 	public void draw(Graphics2D g2d) {
 
-		/* The vehicle */
+		/* The bot */
 		g2d.setPaint(color);
 		g2d.drawOval((int) (position.x - (radius / 2.0d)), (int) (position.y - (radius / 2.0d)), (int) radius, (int) radius);
 		g2d.fillOval((int) (position.x - (radius / 2.0d)), (int) (position.y - (radius / 2.0d)), (int) radius, (int) radius);
@@ -350,7 +363,7 @@ public class Follower extends Bot {
 
 			/* Its future position */
 			drawPoint(g2d, futurePosition, Color.orange, 8.0d);
-			
+
 			/* Its name */
 			g2d.setPaint(Color.white);
 			g2d.drawString(name, (float) (position.x + radius), (float) position.y);
