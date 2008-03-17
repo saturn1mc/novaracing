@@ -196,32 +196,32 @@ public class Follower extends Bot {
 			 * Correction to avoid exiting the area
 			 */
 			if (!env.getSurface().getArea().contains(futurePosition.x, futurePosition.y)) {
-				
-				Vector2d containmentCorrection = new Vector2d(0,0);
-				
-				if(futurePosition.x < 0){
-					containmentCorrection.set(- futurePosition.x, containmentCorrection.y);
+
+				Vector2d containmentCorrection = new Vector2d(0, 0);
+
+				if (futurePosition.x < (2.0d * radius)) {
+					containmentCorrection.set(futurePosition.x - (2.0d * radius), containmentCorrection.y);
 				}
-				
-				if(futurePosition.y < 0){
-					containmentCorrection.set(containmentCorrection.x, -futurePosition.y);
+
+				if (futurePosition.y < (2.0d * radius)) {
+					containmentCorrection.set(containmentCorrection.x, futurePosition.y - (2.0d * radius));
 				}
-				
-				if(futurePosition.x > env.getSurface().getArea().width){
-					containmentCorrection.set(futurePosition.x - env.getSurface().getArea().width, containmentCorrection.y);
+
+				if (futurePosition.x > env.getSurface().getArea().width - (2.0d * radius)) {
+					containmentCorrection.set(futurePosition.x - env.getSurface().getArea().width + (2.0d * radius), containmentCorrection.y);
 				}
-				
-				if(futurePosition.y > env.getSurface().getArea().height){
-					containmentCorrection.set(containmentCorrection.x, futurePosition.y - env.getSurface().getArea().height);
+
+				if (futurePosition.y > env.getSurface().getArea().height - (2.0d * radius)) {
+					containmentCorrection.set(containmentCorrection.x, futurePosition.y - env.getSurface().getArea().height + (2.0d * radius));
 				}
-				
+
 				correction.sub(containmentCorrection);
-				
+
 				avoiding = true;
 			}
 
 			/*
-			 * Corrections to avoid obstacles and other vehicles
+			 * Corrections to avoid obstacles
 			 */
 			if (!avoiding) {
 				for (Polygon p : env.getSurface().getObjects()) {
