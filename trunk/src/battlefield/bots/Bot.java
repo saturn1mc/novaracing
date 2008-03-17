@@ -7,11 +7,12 @@ import java.awt.Graphics2D;
 
 import javax.vecmath.Point2d;
 
+import nova.elements.HumanVehicle;
+import nova.elements.Vehicle;
+
 import battlefield.BattleField;
 
 
-import elements.HumanVehicle;
-import elements.Vehicle;
 
 /**
  * @author camille
@@ -44,13 +45,13 @@ public abstract class Bot {
 	 * Draws the bot
 	 * @param g2d
 	 */
-	public void draw(Graphics2D g2d){}
+	public abstract void draw(Graphics2D g2d);
 	
 	/**
 	 * Update the bot on each frame
 	 * @param env
 	 */
-	public void update(BattleField env){}
+	public abstract void update(BattleField env);
 
 	public String getName() {
 		return name;

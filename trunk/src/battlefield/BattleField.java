@@ -18,9 +18,12 @@ import java.util.Random;
 import javax.vecmath.Point2d;
 
 import battlefield.aStar.Path;
+import battlefield.bots.Bot;
 import battlefield.bots.Follower;
 import battlefield.bots.Leader;
 import battlefield.surface.Surface;
+import battlefield.weapons.Bullet;
+import battlefield.weapons.Weapon;
 
 public class BattleField extends Applet implements Runnable, MouseListener, MouseMotionListener, KeyListener {
 	/**
@@ -29,10 +32,19 @@ public class BattleField extends Applet implements Runnable, MouseListener, Mous
 	private static final long serialVersionUID = 1L;
 
 	private Surface surface;
-	private Leader leader;
-	private LinkedList<Follower> followers;
+	
+	//Teams	
+	private Leader redLeader;
+	private LinkedList<Bot> redTeam;
+	
+	private Leader blueLeader;
+	private LinkedList<Bot> blueTeam;
 
-	public static final int NB_FOLLOWERS = 9;
+	private LinkedList<Weapon> weaponsOnGround;
+	private LinkedList<Bullet> flyingBullets;
+
+
+	public static final int TEAM_SIZE = 9;
 	
 	public static final float MAXX = 10000F; // Size of the battlefield, in
 	// float (not pixels)
@@ -66,18 +78,42 @@ public class BattleField extends Applet implements Runnable, MouseListener, Mous
 	}
 
 	public void initBots() {
-		leader = new Leader("Nova", new Point2d(0, 0), Leader.FORMATION_SQUARE);
-		followers = new LinkedList<Follower>();
 
 		Random random = new Random();
+		
+		redTeam = new LinkedList<Bot>();
+		blueTeam = new LinkedList<Bot>();
 
-		for (int i = 0; i < NB_FOLLOWERS; i++) {
-			Follower f = new Follower("Soldier_" + i, new Point2d(random.nextInt(200), random.nextInt(200)));
-			followers.add(f);
+		//Red team
+		redLeader = new Leader("RedLeader", new Point2d(50, 50), Color.red, Leader.FORMATION_SQUARE);
+		redTeam.add(redLeader);
 
-			f.setLeader(leader);
-			leader.registerFollower(f);
+		for (int i = 0; i < TEAM_SIZE; i++) {
+			Follower f = new Follower("Red_" + i, new Point2d(random.nextInt(200), random.nextInt(200)), Color.red);
+			f.setLeader(redLeader);
+			redLeader.registerFollower(f);
+			redTeam.add(f);
 		}
+
+		//Blue team
+		blueLeader = new Leader("BlueLeader", new Point2d(random.nextInt(400), random.nextInt(400)), Color.blue, Leader.FORMATION_SQUARE);
+		blueTeam.add(blueLeader);
+		
+		for (int i = 0; i < TEAM_SIZE; i++) {
+			Follower f = new Follower("Blue_" + i, new Point2d(random.nextInt(200), random.nextInt(200)), Color.blue);
+			
+			f.setLeader(blueLeader);
+			blueLeader.registerFollower(f);
+			blueTeam.add(f);
+		}
+		
+		redLeader.addEnemies(blueTeam);
+		blueLeader.addEnemies(redTeam);
+	}
+	
+	public void initWeapons() {
+		weaponsOnGround = new LinkedList<Weapon>();
+		flyingBullets = new LinkedList<Bullet>();
 	}
 
 	public boolean handleEvent(Event event) {
@@ -152,20 +188,41 @@ public class BattleField extends Applet implements Runnable, MouseListener, Mous
 		canvasG.drawChars(infos.toCharArray(), 0, Math.min(50, infos.length()), 22, wysize - 7);
 	}
 
-	// Update bots positions and
+	// Update bots positions
 	public void updateBots() {
-		leader.update(this);
-
-		for (Follower f : followers) {
-			f.update(this);
+		for(Bot b : redTeam){
+			b.update(this);
+		}
+		
+		for(Bot b : blueTeam){
+			b.update(this);
 		}
 	}
 
+	// Draw bots
 	public void drawBots(Graphics g) {
-		leader.draw((Graphics2D) g);
+		for(Bot b : redTeam){
+			b.draw((Graphics2D)g);
+		}
+		
+		for(Bot b : blueTeam){
+			b.draw((Graphics2D)g);
+		}
+	}
+	
+	public void updateWeapons() {
+		for (Bullet b : flyingBullets) {
+			b.update(this);
+		}
+	}
 
-		for (Follower f : followers) {
-			f.draw((Graphics2D) g);
+	public void drawWeapons(Graphics g) {
+		for (Weapon w : weaponsOnGround) {
+			w.draw((Graphics2D) g);
+		}
+
+		for (Bullet b : flyingBullets) {
+			b.draw((Graphics2D) g);
 		}
 	}
 
@@ -223,8 +280,8 @@ public class BattleField extends Applet implements Runnable, MouseListener, Mous
 
 	public void mouseMoved(MouseEvent e) {
 
-		pointA.x = leader.getPosition().x;
-		pointA.y = leader.getPosition().y;
+		pointA.x = redLeader.getPosition().x;
+		pointA.y = redLeader.getPosition().y;
 
 		pointB.x = e.getX();
 		pointB.y = e.getY();
@@ -232,7 +289,7 @@ public class BattleField extends Applet implements Runnable, MouseListener, Mous
 		Path path = surface.solve(pointA, pointB);
 
 		if (path != null) {
-			leader.setTarget(path.getPoints().getFirst());
+			redLeader.setTarget(path.getPoints().getFirst());
 		}
 
 		repaint();
@@ -242,22 +299,22 @@ public class BattleField extends Applet implements Runnable, MouseListener, Mous
 	public void keyPressed(KeyEvent e) {
 		if (e.getKeyCode() == KeyEvent.VK_S) {
 			// Square formation
-			leader.setFormationOrder(Leader.FORMATION_SQUARE);
+			redLeader.setFormationOrder(Leader.FORMATION_SQUARE);
 		}
 
 		if (e.getKeyCode() == KeyEvent.VK_L) {
 			// Line formation
-			leader.setFormationOrder(Leader.FORMATION_LINE);
+			redLeader.setFormationOrder(Leader.FORMATION_LINE);
 		}
 		
 		if (e.getKeyCode() == KeyEvent.VK_W) {
 			// Wing formation
-			leader.setFormationOrder(Leader.FORMATION_WING);
+			redLeader.setFormationOrder(Leader.FORMATION_WING);
 		}
 		
 		if (e.getKeyCode() == KeyEvent.VK_B) {
 			// Shield formation
-			leader.setFormationOrder(Leader.FORMATION_SHIELD);
+			redLeader.setFormationOrder(Leader.FORMATION_SHIELD);
 		}
 	}
 

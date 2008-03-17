@@ -1,13 +1,14 @@
 /**
  * 
  */
-package elements;
+package nova.elements;
 
 import java.awt.Graphics2D;
 
 import javax.vecmath.Point2d;
 
-import environment.Environment;
+import nova.environment.Environment;
+
 
 /**
  * @author camille

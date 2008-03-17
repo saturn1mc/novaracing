@@ -14,12 +14,13 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.vecmath.Point2d;
 
-import elements.HumanVehicle;
-import elements.Obstacle;
-import elements.Vehicle;
-import elements.Waypoint;
-import environment.Circuit;
-import environment.Environment;
+import nova.elements.HumanVehicle;
+import nova.elements.Obstacle;
+import nova.elements.Vehicle;
+import nova.elements.Waypoint;
+import nova.environment.Circuit;
+import nova.environment.Environment;
+
 
 /**
  * @author camille
