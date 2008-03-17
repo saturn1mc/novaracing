@@ -30,8 +30,8 @@ public class BattleField extends JPanel {
 
 	public static final int WIDTH = 800;
 	public static final int HEIGHT = 600;
-	public static final int RED_TEAM_SIZE = 9;
-	public static final int BLUE_TEAM_SIZE = 9;
+	public static final int RED_TEAM_SIZE = 10;
+	public static final int BLUE_TEAM_SIZE = 3;
 
 	private boolean playing;
 	
@@ -57,6 +57,7 @@ public class BattleField extends JPanel {
 
 	public BattleField() {
 		super();
+		setDoubleBuffered(true);
 
 		setPreferredSize(new Dimension(WIDTH, HEIGHT));
 		
