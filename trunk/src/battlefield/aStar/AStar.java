@@ -1,4 +1,4 @@
-package aStar;
+package battlefield.aStar;
 
 import java.util.Hashtable;
 import java.util.LinkedList;
@@ -6,7 +6,8 @@ import java.util.LinkedList;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
-import surface.Graph;
+import battlefield.surface.Graph;
+
 
 public class AStar {
 

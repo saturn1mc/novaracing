@@ -1,4 +1,4 @@
-package surface;
+package battlefield.surface;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -9,8 +9,9 @@ import java.util.LinkedList;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
-import aStar.AStar;
-import aStar.Path;
+import battlefield.aStar.AStar;
+import battlefield.aStar.Path;
+
 import elements.Waypoint;
 
 public class Surface {

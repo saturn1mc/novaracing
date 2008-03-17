@@ -7,6 +7,9 @@ import java.awt.Graphics2D;
 
 import javax.vecmath.Point2d;
 
+import battlefield.BattleField;
+
+
 import environment.Environment;
 
 /**
@@ -35,13 +38,15 @@ public abstract class Element {
 	 * Draws the element
 	 * @param g2d
 	 */
-	public void draw(Graphics2D g2d){}
+	public abstract void draw(Graphics2D g2d);
 	
 	/**
 	 * Update the element on each frame
 	 * @param env
 	 */
 	public void update(Environment env){}
+	
+	public void update(BattleField env){}
 
 	public String getName() {
 		return name;

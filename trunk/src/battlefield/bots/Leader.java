@@ -1,7 +1,7 @@
 /**
  * 
  */
-package bots;
+package battlefield.bots;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -12,7 +12,8 @@ import java.util.LinkedList;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
-import applets.BattleField;
+import battlefield.BattleField;
+
 import elements.HumanVehicle;
 import elements.Vehicle;
 import elements.Waypoint;
@@ -99,6 +100,11 @@ public class Leader extends Bot {
 	 * Current target
 	 */
 	private Waypoint target;
+	
+	/**
+	 * Current enemy
+	 */
+	private Leader enemy;
 
 	/**
 	 * Latest registered follower
@@ -291,6 +297,14 @@ public class Leader extends Bot {
 
 	public void setSpeed(double speed) {
 		this.speed = speed;
+	}
+	
+	public Leader getEnemy() {
+		return enemy;
+	}
+	
+	public void setEnemy(Leader enemy) {
+		this.enemy = enemy;
 	}
 
 	public Waypoint getCurrentTarget() {
