@@ -75,9 +75,6 @@ public class Surface {
 
 	public void draw(Graphics g) {
 
-		g.setColor(Color.RED);
-		g.drawRect(0, 0, area.width, area.height);
-
 		//Drawing objects
 		g.setColor(Color.BLACK);
 		for (Polygon p : objects) {
