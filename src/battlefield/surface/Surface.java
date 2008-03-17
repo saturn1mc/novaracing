@@ -2,8 +2,8 @@ package battlefield.surface;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.Polygon;
+import java.awt.Rectangle;
 import java.util.LinkedList;
 
 import javax.vecmath.Point2d;
@@ -14,17 +14,21 @@ import battlefield.aStar.Path;
 
 public class Surface {
 
-	public int wxsize, wysize;
+	public static int MARGIN = 1;
+	public static int BORDER_SIZE = 2;
 
+	private Rectangle area;
 	private LinkedList<Polygon> objects; // The objects on the surface
 	private Graph graph;
 	private AStar aStar;
-	private Path path;
 
-	public Surface(int wxsize, int wysize, float scale, int nbPoints) {
-		this.wxsize = wxsize;
-		this.wysize = wysize;
+	public Surface(int width, int height, int nbPoints) {
+
+		area = new Rectangle(width, height);
+
 		objects = new LinkedList<Polygon>();
+
+		//Obstacles
 
 		Polygon p1 = new Polygon();
 		p1.addPoint(100, 200);
@@ -35,8 +39,8 @@ public class Surface {
 
 		Polygon p2 = new Polygon();
 		p2.addPoint(300, 500);
-		p2.addPoint(300, 800);
-		p2.addPoint(320, 800);
+		p2.addPoint(300, 550);
+		p2.addPoint(320, 550);
 		p2.addPoint(320, 500);
 		objects.add(p2);
 
@@ -53,7 +57,7 @@ public class Surface {
 		p4.addPoint(600, 250);
 		p4.addPoint(600, 200);
 		objects.add(p4);
-		
+
 		Polygon p5 = new Polygon();
 		p5.addPoint(500, 400);
 		p5.addPoint(550, 420);
@@ -61,18 +65,21 @@ public class Surface {
 		p5.addPoint(600, 450);
 		p5.addPoint(600, 400);
 		objects.add(p5);
-		
+
 		Polygon p6 = new Polygon();
 		p6.addPoint(400, 420);
 		p6.addPoint(300, 480);
 		p6.addPoint(400, 480);
 		objects.add(p6);
-		
+
 		this.graph = new Graph(this, nbPoints);
 		this.aStar = new AStar(graph, graph.getPoints().keySet().size());
 	}
 
 	public void draw(Graphics g) {
+
+		g.setColor(Color.RED);
+		g.drawRect(0, 0, area.width, area.height);
 
 		//Drawing objects
 		g.setColor(Color.BLACK);
@@ -92,21 +99,6 @@ public class Surface {
 		g.setColor(Color.RED);
 		for (Point2d p : graph.getPoints().keySet()) {
 			g.fillOval((int) (p.x - (Graph.PTS_RADIUS / 2.0d)), (int) (p.y - (Graph.PTS_RADIUS / 2.0d)), Graph.PTS_RADIUS, Graph.PTS_RADIUS);
-		}
-
-		//Drawing finded path
-		if (path != null && path.isSolved()) {
-			
-			//Drawing path
-			g.setColor(Color.GREEN);
-			
-			for (Waypoint wp : path.getPoints()) {
-				wp.draw((Graphics2D) g);
-				
-				if(wp.getNext() != null){
-					g.drawLine((int) wp.getPosition().x, (int) wp.getPosition().y, (int) wp.getNext().getPosition().x, (int) wp.getNext().getPosition().y);
-				}
-			}
 		}
 	}
 
@@ -139,12 +131,12 @@ public class Surface {
 		return true;
 	}
 
-	public Path solve(Point2d start, Point2d goal) {
+	public synchronized Path solve(Point2d start, Point2d goal) {
 		Point2d nearestStart = graph.getNearestPoint(start);
 		Point2d nearestGoal = graph.getNearestPoint(goal);
 
-		path = aStar.solve(nearestStart, nearestGoal);
-		
+		Path path = aStar.solve(nearestStart, nearestGoal);
+
 		return path;
 	}
 
@@ -160,7 +152,7 @@ public class Surface {
 		return aStar;
 	}
 
-	public void setPath(Path path) {
-		this.path = path;
+	public Rectangle getArea() {
+		return area;
 	}
 }

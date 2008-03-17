@@ -7,10 +7,8 @@ import java.awt.Graphics2D;
 
 import javax.vecmath.Point2d;
 
-import nova.elements.HumanVehicle;
-import nova.elements.Vehicle;
-
 import battlefield.BattleField;
+import battlefield.weapons.Weapon;
 
 
 
@@ -27,8 +25,10 @@ public abstract class Bot {
 	 */
 	protected String name;
 	
-	protected double life;
-	protected int ammo;
+	/**
+	 * Bot's current weapon
+	 */
+	protected Weapon currentWeapon;
 	
 	/**
 	 * The bot's absolute position in the window
@@ -71,29 +71,7 @@ public abstract class Bot {
 	
 	public double getRadius(){return 0.0d;}
 	
-	/**
-	 * Avoidance indicator for a {@link Vehicle}
-	 * @param vehicle
-	 * @return <code>true</code> if the bot must be avoided or else false
-	 */
-	public boolean avoidedBy(Vehicle vehicle){return false;}
-	
-	/**
-	 * Avoidance indicator for a {@link HumanVehicle}
-	 * @param vehicle
-	 * @return <code>true</code> if the bot must be avoided or else false
-	 */
-	public boolean avoidedBy(HumanVehicle vehicle){return false;}
-	
-	/**
-	 * Effect on {@link Vehicle}.
-	 * @param vehicle
-	 */
-	public void effectOn(Vehicle vehicle){}
-	
-	/**
-	 * Effect on {@link HumanVehicle}
-	 * @param vehicle
-	 */
-	public void effectOn(HumanVehicle vehicle){}
+	public void setCurrentWeapon(Weapon currentWeapon) {
+		this.currentWeapon = currentWeapon;
+	}
 }

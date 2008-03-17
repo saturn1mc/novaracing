@@ -4,7 +4,10 @@
 package battlefield.weapons;
 
 import java.awt.Graphics2D;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
+import javax.swing.Timer;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
@@ -19,28 +22,64 @@ public class Pistol extends Weapon {
 	public static final String name = "Pistol";
 	public static int MAX_AMMO = 15;
 	public static int MAX_RANGE = 200;
-	public static int FIRE_RATE = 1;
-	
+	public static int FIRE_LATENCY = 1000;
+	public static double FIRE_STRENGTH = 10d;
+
 	private int bullets;
-	
+	private boolean cooling;
+
 	public Pistol(Point2d position) {
 		super(name, position);
 		this.bullets = MAX_AMMO;
 	}
-	
+
 	@Override
-	public int ammoLeft() {
+	public synchronized int ammoLeft() {
 		return bullets;
 	}
 
 	@Override
-	public int fireRate() {
-		return FIRE_RATE;
+	public int fireLatency() {
+		return FIRE_LATENCY;
 	}
 
 	@Override
-	public void fire(BattleField env, Point2d origin, Vector2d direction) {
-		
+	public synchronized void shoot(BattleField env, Point2d origin, Vector2d direction) {
+
+		if (canShoot()) {
+
+			bullets--;
+			
+			direction.normalize();
+			env.fireBullet(new Bullet(new Point2d(origin), direction, FIRE_STRENGTH, MAX_RANGE));
+			
+			setCooling(true);
+			
+			ActionListener al = new ActionListener(){
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					setCooling(false);
+				}
+			};
+			
+			Timer timer = new Timer(FIRE_LATENCY, al);
+			timer.setRepeats(false);
+			timer.start();
+		}
+	}
+
+	@Override
+	public synchronized void reload(int bullets) {
+		this.bullets += bullets;
+		this.bullets = Math.max(this.bullets, MAX_AMMO);
+	}
+	
+	private synchronized boolean canShoot() {
+		return (bullets > 0 && !cooling);
+	}
+	
+	private synchronized void setCooling(boolean cooling){
+		this.cooling = cooling;
 	}
 
 	@Override

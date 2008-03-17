@@ -13,6 +13,7 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
 import battlefield.BattleField;
+import battlefield.aStar.Path;
 import battlefield.surface.Waypoint;
 
 /**
@@ -23,7 +24,8 @@ public class Leader extends Bot {
 
 	public static final int STATE_SEARCHING = 0;
 	public static final int STATE_ATTACKING = 1;
-	
+	public static final int STATE_ESCAPING = 2;
+
 	public static final int FORMATION_NONE = 0;
 	public static final int FORMATION_LINE = 1;
 	public static final int FORMATION_SQUARE = 2;
@@ -100,7 +102,7 @@ public class Leader extends Bot {
 	 * Current target
 	 */
 	private Waypoint target;
-	
+
 	/**
 	 * Current enemy
 	 */
@@ -110,7 +112,7 @@ public class Leader extends Bot {
 	 * Latest registered follower
 	 */
 	private LinkedList<Follower> followers;
-	
+
 	/**
 	 * Bot's enemies
 	 */
@@ -122,17 +124,22 @@ public class Leader extends Bot {
 	 * Damages
 	 */
 	private double damages;
-	
+
 	/**
 	 * Bot's current state
 	 */
 	private int currentState;
 
 	/**
+	 * Bot's current path
+	 */
+	private Path currentPath;
+
+	/**
 	 * Bot's color
 	 */
 	private Color color;
-	
+
 	public Leader(String name, Point2d position, Color color, int formation) {
 		super(name, position);
 
@@ -160,6 +167,8 @@ public class Leader extends Bot {
 	@Override
 	public void update(BattleField env) {
 
+		updateState(env);
+
 		if (target != null) {
 
 			// TODO take the other elements effects into account
@@ -184,10 +193,112 @@ public class Leader extends Bot {
 			sight.addPoint((int) (position.x - (side.x * radius)), (int) (position.y - (side.y * radius)));
 			sight.addPoint((int) (futurePosition.x - (side.x * radius)), (int) (futurePosition.y - (side.y * radius)));
 			sight.addPoint((int) (futurePosition.x + (side.x * radius)), (int) (futurePosition.y + (side.y * radius)));
+		}
+	}
 
-			if (target.isReachedBy(this)) {
-				this.target = target.getNext();
+	private void updateState(BattleField env) {
+
+		Bot enemy;
+
+		switch (currentState) {
+
+		case STATE_SEARCHING:
+
+			if (target == null) {
+
+				while (currentPath == null || !currentPath.isSolved()) {
+
+					Point2d start = env.getSurface().getGraph().getRandomPoint();
+					Point2d stop = env.getSurface().getGraph().getRandomPoint();
+
+					currentPath = new Path(env.getSurface().solve(new Point2d(start.x, start.y), new Point2d(stop.x, stop.y)));
+				}
+
+				setTarget(currentPath.getPoints().getFirst());
+
+			} else {
+				if (target.isReachedBy(this)) {
+					target = target.getNext();
+				}
+
+				enemy = enemyAtSight(env);
+
+				if (enemy != null) {
+
+					if (getFollowersNumber() > 3) { // Panic limit
+
+						currentState = STATE_ATTACKING;
+						currentPath = null;
+
+						target = new Waypoint(enemy.position);
+
+					} else {
+						currentState = STATE_ESCAPING;
+						currentPath = null;
+					}
+				}
 			}
+
+			break;
+
+		case STATE_ATTACKING:
+
+			enemy = enemyAtSight(env);
+
+			if (enemy != null) {
+				currentState = STATE_ATTACKING;
+				target = new Waypoint(enemy.position);
+
+				shootEnemy(env, enemy);
+			} else {
+				target = null;
+				currentState = STATE_SEARCHING;
+				updateState(env);
+			}
+
+			break;
+
+		case STATE_ESCAPING:
+
+			enemy = enemyAtSight(env);
+
+			if (enemy != null) {
+				currentState = STATE_ESCAPING;
+
+				Vector2d distance = new Vector2d(position.x - enemy.position.x, position.y - enemy.position.y);
+
+				target = new Waypoint(new Point2d(position.x + distance.x, position.y + distance.y));
+
+				shootEnemy(env, enemy);
+
+			} else {
+				target = null;
+				currentState = STATE_SEARCHING;
+				updateState(env);
+			}
+
+			break;
+
+		default:
+			System.err.println("Unknown state : " + currentState);
+		}
+	}
+
+	private Bot enemyAtSight(BattleField env) {
+		for (Bot enemy : enemies) {
+			if (env.getSurface().canSee(position, enemy.position)) {
+				return enemy;
+			}
+		}
+
+		return null;
+	}
+
+	private void shootEnemy(BattleField env, Bot enemy) {
+		Vector2d aim = new Vector2d(enemy.position.x - position.x, enemy.position.y - position.y);
+
+		if (currentWeapon != null) {
+			currentWeapon.shoot(env, new Point2d(position.x, position.y), aim);
 		}
 	}
 
@@ -242,34 +353,64 @@ public class Leader extends Bot {
 			boolean avoiding = false;
 
 			/*
+			 * Correction to avoid exiting the area
+			 */
+			if (!env.getSurface().getArea().contains(futurePosition.x, futurePosition.y)) {
+				
+				Vector2d containmentCorrection = new Vector2d(0, 0);
+
+				if (futurePosition.x < 0) {
+					containmentCorrection.set(-futurePosition.x, containmentCorrection.y);
+				}
+
+				if (futurePosition.y < 0) {
+					containmentCorrection.set(containmentCorrection.x, -futurePosition.y);
+				}
+
+				if (futurePosition.x > env.getSurface().getArea().width) {
+					containmentCorrection.set(futurePosition.x - env.getSurface().getArea().width, containmentCorrection.y);
+				}
+
+				if (futurePosition.y > env.getSurface().getArea().height) {
+					containmentCorrection.set(containmentCorrection.x, futurePosition.y - env.getSurface().getArea().height);
+				}
+
+				correction.sub(containmentCorrection);
+
+				avoiding = true;
+			}
+
+			/*
 			 * Corrections to avoid obstacles and other vehicles
 			 */
-			for (Polygon p : env.getSurface().getObjects()) {
+			if (!avoiding) {
+				for (Polygon p : env.getSurface().getObjects()) {
 
-				Rectangle bbox = p.getBounds();
-				Rectangle intersection = bbox.intersection(sight.getBounds());
+					Rectangle bbox = p.getBounds();
+					Rectangle intersection = bbox.intersection(sight.getBounds());
 
-				/* If the element is on the way */
-				if (!intersection.isEmpty()) {
+					/* If the element is on the way */
+					if (!intersection.isEmpty()) {
 
-					avoiding = true;
+						avoiding = true;
 
-					Point2d A = position;
-					Point2d B = futurePosition;
+						Point2d A = position;
+						Point2d B = futurePosition;
 
-					double L = Math.sqrt(((B.x - A.x) * (B.x - A.x)) + ((B.y - A.y) * (B.y - A.y)));
-					double S = (((A.y - bbox.getCenterY()) * (B.x - A.x)) - ((A.x - bbox.getCenterX()) * (B.y - A.y))) / (L * L);
+						double L = Math.sqrt(((B.x - A.x) * (B.x - A.x)) + ((B.y - A.y) * (B.y - A.y)));
+						double S = (((A.y - bbox.getCenterY()) * (B.x - A.x)) - ((A.x - bbox.getCenterX()) * (B.y - A.y))) / (L * L);
 
-					Vector2d avoidanceCorrection;
+						Vector2d avoidanceCorrection;
 
-					if (S > 0) {
-						avoidanceCorrection = new Vector2d(side.x, side.y);
-					} else {
-						avoidanceCorrection = new Vector2d(-side.x, -side.y);
+						if (S > 0) {
+							avoidanceCorrection = new Vector2d(side.x, side.y);
+						} else {
+							avoidanceCorrection = new Vector2d(-side.x, -side.y);
+						}
+
+						avoidanceCorrection.scale(intersection.getWidth() * radius * 2.0);
+						correction.add(avoidanceCorrection);
 					}
-
-					avoidanceCorrection.scale(intersection.getWidth() * radius * 2.0);
-					correction.add(avoidanceCorrection);
 				}
 			}
 
@@ -314,11 +455,11 @@ public class Leader extends Bot {
 	public void setSpeed(double speed) {
 		this.speed = speed;
 	}
-	
+
 	public Leader getEnemy() {
 		return enemy;
 	}
-	
+
 	public void setEnemy(Leader enemy) {
 		this.enemy = enemy;
 	}
@@ -350,8 +491,8 @@ public class Leader extends Bot {
 	public synchronized int getFollowersNumber() {
 		return followers.size();
 	}
-	
-	public void addEnemies(LinkedList<Bot> enemies){
+
+	public void addEnemies(LinkedList<Bot> enemies) {
 		this.enemies.addAll(enemies);
 	}
 
@@ -361,9 +502,9 @@ public class Leader extends Bot {
 		Point2d reference;
 		int id = getFollowerId(f);
 		int followersNumber = getFollowersNumber();
-		
+
 		switch (formationOrder) {
-		
+
 		case FORMATION_NONE:
 			target = this.position;
 			break;
@@ -374,8 +515,7 @@ public class Leader extends Bot {
 			int column = (id - 1) % squareSize;
 			int line = (id - 1) / squareSize;
 
-			reference = new Point2d(this.position.x + (this.forward.x * (-radius * 2.0)) + (this.side.x * -(radius * 2.0) * (squareSize / 2)), this.position.y + (this.forward.y * -(radius * 2.0))
-					+ (this.side.y * -(radius * 2.0) * (squareSize / 2)));
+			reference = new Point2d(this.position.x + (this.forward.x * (-radius * 2.0)) + (this.side.x * -(radius * 2.0) * (squareSize / 2)), this.position.y + (this.forward.y * -(radius * 2.0)) + (this.side.y * -(radius * 2.0) * (squareSize / 2)));
 			target = new Point2d(reference.x + (this.side.x * (radius * 2.0 * column)) + (this.forward.x * -(radius * 2.0 * line)), reference.y + (this.side.y * (radius * 2.0 * column)) + (this.forward.y * -(radius * 2.0 * line)));
 
 			break;
@@ -383,39 +523,38 @@ public class Leader extends Bot {
 		case FORMATION_LINE:
 			target = new Point2d(this.position.x + (this.forward.x * -(radius * 2.0 * id)), this.position.y + (this.forward.y * -(radius * 2.0 * id)));
 			break;
-			
+
 		case FORMATION_WING:
-			
+
 			int leftWingLimit = (followersNumber / 2);
-			int dist = (id % (followersNumber-leftWingLimit));
-			
+			int dist = (id % (followersNumber - leftWingLimit));
+
 			reference = new Point2d(this.position.x - (forward.x * 2.0 * radius), this.position.y - (forward.y * 2.0 * radius));
-			
-			if(id <= leftWingLimit){
-				Vector2d leftWingDir = new Vector2d((forward.x * Math.cos(Math.PI )) - (forward.y * Math.sin(Math.PI * 0.9d)), (forward.y * Math.cos(Math.PI * 0.9d)) + (forward.x * Math.sin(Math.PI * 0.9d)));
+
+			if (id <= leftWingLimit) {
+				Vector2d leftWingDir = new Vector2d((forward.x * Math.cos(Math.PI)) - (forward.y * Math.sin(Math.PI * 0.9d)), (forward.y * Math.cos(Math.PI * 0.9d)) + (forward.x * Math.sin(Math.PI * 0.9d)));
 				leftWingDir.normalize();
-				
+
 				target = new Point2d(reference.x + (leftWingDir.x * (dist * radius * 2.0)), reference.y + (leftWingDir.y * (dist * radius * 2.0)));
-			}
-			else{
+			} else {
 				Vector2d rightWingDir = new Vector2d((forward.x * Math.cos(-Math.PI * 0.9d)) - (forward.y * Math.sin(-Math.PI * 0.9d)), (forward.y * Math.cos(-Math.PI * 0.9d)) + (forward.x * Math.sin(-Math.PI * 0.9d)));
 				rightWingDir.normalize();
-				
+
 				target = new Point2d(reference.x + (rightWingDir.x * (dist * radius * 2.0)), reference.y + (rightWingDir.y * (dist * radius * 2.0)));
 			}
-			
+
 			break;
-			
+
 		case FORMATION_SHIELD:
-			
+
 			double shieldRadius = (followersNumber * 2.0 * radius) / (2.0 * Math.PI);
-			double rotation = (id-1) * ((2.0d * Math.PI) / followersNumber);
+			double rotation = (id - 1) * ((2.0d * Math.PI) / followersNumber);
 			Vector2d dir = new Vector2d((forward.x * Math.cos(rotation)) - (forward.y * Math.sin(rotation)), (forward.y * Math.cos(rotation)) + (forward.x * Math.sin(rotation)));
-			
+
 			target = new Point2d(this.position.x + (dir.x * shieldRadius), this.position.y + (dir.y * shieldRadius));
-			
+
 			break;
-			
+
 		case FORMATION_SPIRAL:
 			target = this.position;
 			break;
@@ -444,10 +583,27 @@ public class Leader extends Bot {
 	@Override
 	public void draw(Graphics2D g2d) {
 
-		/* The vehicle */
+		/* The bot */
+		g2d.setPaint(Color.white);
+		g2d.fillOval((int) (position.x - ((radius + 4) / 2.0d)), (int) (position.y - ((radius + 4) / 2.0d)), (int) (radius + 4), (int) (radius + 4));
 		g2d.setPaint(color);
-		g2d.drawOval((int) (position.x - (radius / 2.0d)), (int) (position.y - (radius / 2.0d)), (int) radius, (int) radius);
 		g2d.fillOval((int) (position.x - (radius / 2.0d)), (int) (position.y - (radius / 2.0d)), (int) radius, (int) radius);
+
+		/* Its current path */
+		if (currentPath != null && currentPath.isSolved()) {
+			Waypoint prev = null;
+
+			for (Waypoint wp : currentPath.getPoints()) {
+
+				wp.draw(g2d);
+
+				if (prev != null) {
+					g2d.drawLine((int) prev.getPosition().x, (int) prev.getPosition().y, (int) wp.getPosition().x, (int) wp.getPosition().y);
+				}
+
+				prev = wp;
+			}
+		}
 
 		if (Bot.showForces) {
 			/* Its sight rectangle */
@@ -466,7 +622,7 @@ public class Leader extends Bot {
 
 			/* Its future position */
 			drawPoint(g2d, futurePosition, Color.orange, 8.0d);
-			
+
 			/* Its name */
 			g2d.setPaint(Color.white);
 			g2d.drawString(name, (float) (position.x + radius), (float) position.y);

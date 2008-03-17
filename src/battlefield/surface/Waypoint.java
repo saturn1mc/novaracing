@@ -54,7 +54,6 @@ public class Waypoint extends Element {
 
 	@Override
 	public void draw(Graphics2D g2d) {
-		g2d.setPaint(Color.magenta);
 		g2d.drawOval((int) (position.x - (radius / 2.0d)), (int) (position.y - (radius / 2.0d)), (int) radius, (int) radius);
 	}
 	

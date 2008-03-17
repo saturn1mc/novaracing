@@ -20,7 +20,8 @@ public abstract class Weapon extends Element{
 	}
 	
 	public abstract int maxRange();
-	public abstract int fireRate();
+	public abstract int fireLatency();
 	public abstract int ammoLeft();
-	public abstract void fire(BattleField env, Point2d origin, Vector2d direction);
+	public abstract void shoot(BattleField env, Point2d origin, Vector2d direction);
+	public abstract void reload(int bullets);
 }

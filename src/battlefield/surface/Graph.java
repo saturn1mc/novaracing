@@ -11,6 +11,8 @@ import java.util.Random;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
+import battlefield.BattleField;
+
 /**
  * @author camille
  * 
@@ -18,7 +20,8 @@ import javax.vecmath.Vector2d;
 public class Graph {
 
 	public static final int PTS_RADIUS = 5;
-	private static final int WALL_DISTANCE = 2;
+	private static final int BORDER = 50;
+	private static final int WALL_DISTANCE = 5;
 	private static final int POINTS_PER_SEGMENT = 6;
 
 	private Hashtable<Point2d, LinkedList<Point2d>> points;
@@ -62,9 +65,43 @@ public class Graph {
 
 		return nearest;
 	}
+	
+	public Point2d getNearestPoint(Point2d p, double forbiddenRadius) {
+		double dist = Integer.MAX_VALUE;
+		Point2d nearest = null;
+
+		for (Point2d contender : points.keySet()) {
+			
+			double distance = new Vector2d(p.x - contender.x, p.y - contender.y).length();
+			
+			if ((distance > forbiddenRadius) && (distance < dist)) {
+				dist = distance;
+				nearest = contender;
+			}
+		}
+
+		return nearest;
+	}
+	
+	public Point2d getRandomPoint(){
+		
+		int i = rand.nextInt(points.keySet().size());
+		int cpt = 0;
+		
+		for(Point2d p : points.keySet()){
+			if(cpt == i){
+				return p;
+			}
+			
+			cpt++;
+		}
+		
+		return null;
+	}
 
 	private void mapSurface() {
 
+		/* Object outline */
 		for (Polygon p : surface.getObjects()) {
 			for (int i = 0; i < p.npoints; i++) {
 				Vector2d dir = new Vector2d(p.xpoints[(i + 1) % p.npoints] - p.xpoints[i], p.ypoints[(i + 1) % p.npoints] - p.ypoints[i]);
@@ -86,12 +123,19 @@ public class Graph {
 			}
 		}
 
+		/* Corners */
+		addPoint(new Point2d(BORDER, BORDER));
+		addPoint(new Point2d(BattleField.WIDTH - BORDER, BORDER));
+		addPoint(new Point2d(BattleField.WIDTH - BORDER, BattleField.HEIGHT - BORDER));
+		addPoint(new Point2d(BORDER, BattleField.HEIGHT - BORDER));
+		
+		/* Random points */
 		int pointsAdded = 0;
 
 		while (pointsAdded < nbPoints) {
 
-			int x = rand.nextInt(surface.wxsize);
-			int y = rand.nextInt(surface.wxsize);
+			int x = rand.nextInt(BattleField.WIDTH);
+			int y = rand.nextInt(BattleField.HEIGHT);
 
 			Point2d p = new Point2d(x, y);
 

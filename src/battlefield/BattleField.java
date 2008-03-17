@@ -13,16 +13,15 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.LinkedList;
-import java.util.Random;
 
 import javax.vecmath.Point2d;
 
-import battlefield.aStar.Path;
 import battlefield.bots.Bot;
 import battlefield.bots.Follower;
 import battlefield.bots.Leader;
 import battlefield.surface.Surface;
 import battlefield.weapons.Bullet;
+import battlefield.weapons.Pistol;
 import battlefield.weapons.Weapon;
 
 public class BattleField extends Applet implements Runnable, MouseListener, MouseMotionListener, KeyListener {
@@ -30,6 +29,11 @@ public class BattleField extends Applet implements Runnable, MouseListener, Mous
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+
+	public static final int WIDTH = 800;
+	public static final int HEIGHT = 600;
+	public static final int RED_TEAM_SIZE = 9;
+	public static final int BLUE_TEAM_SIZE = 3;
 
 	private Surface surface;
 	
@@ -43,25 +47,11 @@ public class BattleField extends Applet implements Runnable, MouseListener, Mous
 	private LinkedList<Weapon> weaponsOnGround;
 	private LinkedList<Bullet> flyingBullets;
 
-
-	public static final int TEAM_SIZE = 9;
-	
-	public static final float MAXX = 10000F; // Size of the battlefield, in
-	// float (not pixels)
-	public static final float MAXY = 7500F;
-
-	public static final int WXSIZE = 800; // size in pixels (in x, the y is
-
-	// automatically deduced)
-
 	public void init() {
 		super.init();
 
-		wxsize = WXSIZE; // size in pixels
-		wysize = (int) (MAXY / scale); // The y axe is automatically computed
-
-		resize(wxsize, wysize);
-		canvasimage = createImage(wxsize, wysize);
+		resize(WIDTH, HEIGHT);
+		canvasimage = createImage(WIDTH, HEIGHT);
 		canvasG = canvasimage.getGraphics();
 		myG = getGraphics();
 
@@ -70,37 +60,41 @@ public class BattleField extends Applet implements Runnable, MouseListener, Mous
 		addKeyListener(this);
 
 		initSurface();
+		initWeapons();
 		initBots();
 	}
 
 	public void initSurface() {
-		surface = new Surface(wxsize, wysize, scale, 50);
+		surface = new Surface(WIDTH, HEIGHT, 60);
+	}
+	
+	public void initWeapons(){
+		weaponsOnGround = new LinkedList<Weapon>();
+		flyingBullets = new LinkedList<Bullet>();
 	}
 
 	public void initBots() {
-
-		Random random = new Random();
 		
 		redTeam = new LinkedList<Bot>();
 		blueTeam = new LinkedList<Bot>();
 
 		//Red team
-		redLeader = new Leader("RedLeader", new Point2d(50, 50), Color.red, Leader.FORMATION_SQUARE);
+		redLeader = new Leader("RedLeader", new Point2d(100, 100), Color.red, Leader.FORMATION_SQUARE);
 		redTeam.add(redLeader);
 
-		for (int i = 0; i < TEAM_SIZE; i++) {
-			Follower f = new Follower("Red_" + i, new Point2d(50 + random.nextInt((int)Follower.radius * 2), 50 + random.nextInt((int)Follower.radius * 2)), Color.red);
+		for (int i = 0; i < RED_TEAM_SIZE; i++) {
+			Follower f = new Follower("Red_" + i, new Point2d(101, 101), Color.red);
 			f.setLeader(redLeader);
 			redLeader.registerFollower(f);
 			redTeam.add(f);
 		}
 
 		//Blue team
-		blueLeader = new Leader("BlueLeader", new Point2d(500, 500), Color.blue, Leader.FORMATION_SQUARE);
+		blueLeader = new Leader("BlueLeader", new Point2d(BattleField.WIDTH - 100, (BattleField.HEIGHT - 100)), Color.blue, Leader.FORMATION_SQUARE);
 		blueTeam.add(blueLeader);
 		
-		for (int i = 0; i < TEAM_SIZE; i++) {
-			Follower f = new Follower("Blue_" + i, new Point2d(500 + random.nextInt((int)Follower.radius * 2), 500 + random.nextInt((int)Follower.radius * 2)), Color.blue);
+		for (int i = 0; i < BLUE_TEAM_SIZE; i++) {
+			Follower f = new Follower("Blue_" + i, new Point2d((BattleField.WIDTH - 101), (BattleField.HEIGHT - 101)), Color.blue);
 			
 			f.setLeader(blueLeader);
 			blueLeader.registerFollower(f);
@@ -109,11 +103,16 @@ public class BattleField extends Applet implements Runnable, MouseListener, Mous
 		
 		redLeader.addEnemies(blueTeam);
 		blueLeader.addEnemies(redTeam);
-	}
-	
-	public void initWeapons() {
-		weaponsOnGround = new LinkedList<Weapon>();
-		flyingBullets = new LinkedList<Bullet>();
+		
+		//WEAPON TEST
+		for(Bot b : redTeam){
+			b.setCurrentWeapon(new Pistol(new Point2d(0, 0)));
+		}
+		
+		for(Bot b : blueTeam){
+			b.setCurrentWeapon(new Pistol(new Point2d(0, 0)));
+		}
+		//
 	}
 
 	public boolean handleEvent(Event event) {
@@ -161,14 +160,17 @@ public class BattleField extends Applet implements Runnable, MouseListener, Mous
 	// repaint all components
 	public void paint(Graphics g) {
 		canvasG.setColor(bgColor);
-		canvasG.fillRect(0, 0, wxsize, wysize);
+		canvasG.fillRect(0, 0, WIDTH, HEIGHT);
 		surface.draw(canvasG);
 
+		updateWeapons();
+		drawWeapons(canvasG);
+		
 		updateBots();
 		drawBots(canvasG);
 
 		canvasG.setColor(Color.black);
-		canvasG.drawRect(0, 0, wxsize - 1, wysize - 1);
+		canvasG.drawRect(0, 0, WIDTH - 1, HEIGHT - 1);
 
 		if ((pointA.x > -1) && (pointB.x > -1)) {
 			if (surface.canSee(pointA, pointB))
@@ -177,6 +179,7 @@ public class BattleField extends Applet implements Runnable, MouseListener, Mous
 				canvasG.setColor(Color.red);
 			canvasG.drawLine((int) pointA.x, (int) pointA.y, (int) pointB.x, (int) pointB.y);
 		}
+		
 		drawGUI();
 		showbuffer();
 	}
@@ -184,8 +187,8 @@ public class BattleField extends Applet implements Runnable, MouseListener, Mous
 	// Very simple GUI.. Just print the infos string on the bottom of the screen
 	private void drawGUI() {
 		canvasG.setColor(Color.red);
-		canvasG.drawRect(20, wysize - 23, wxsize - 41, 20);
-		canvasG.drawChars(infos.toCharArray(), 0, Math.min(50, infos.length()), 22, wysize - 7);
+		canvasG.drawRect(20, HEIGHT - 23, WIDTH - 41, 20);
+		canvasG.drawChars(infos.toCharArray(), 0, Math.min(50, infos.length()), 22, HEIGHT - 7);
 	}
 
 	// Update bots positions
@@ -214,6 +217,12 @@ public class BattleField extends Applet implements Runnable, MouseListener, Mous
 		for (Bullet b : flyingBullets) {
 			b.update(this);
 		}
+		
+		for (Bullet b : flyingBullets) {
+			if(!b.isFlying()){
+				
+			}
+		}
 	}
 
 	public void drawWeapons(Graphics g) {
@@ -222,8 +231,14 @@ public class BattleField extends Applet implements Runnable, MouseListener, Mous
 		}
 
 		for (Bullet b : flyingBullets) {
-			b.draw((Graphics2D) g);
+			if(b.isFlying()){
+				b.draw((Graphics2D) g);
+			}
 		}
+	}
+	
+	public void fireBullet(Bullet bullet){
+		flyingBullets.add(bullet);
 	}
 
 	// Reset positions and data of all bots
@@ -237,7 +252,6 @@ public class BattleField extends Applet implements Runnable, MouseListener, Mous
 
 	// Very simple constructor
 	public BattleField() {
-		scale = MAXX / WXSIZE;
 	}
 
 	public Surface getSurface() {
@@ -245,15 +259,11 @@ public class BattleField extends Applet implements Runnable, MouseListener, Mous
 	}
 
 	private Thread update;
-	// MyBot bot;
-	float scale;
 	Point2d viewCenter;
 	int framesSinceTouch;
 	Image canvasimage;
 	Graphics canvasG;
 	Graphics myG;
-	int wxsize;
-	int wysize;
 	String infos = "";
 	static final Color bgColor = new Color(0.9F, 0.9F, 0.6F);
 	private Point2d pointA = new Point2d(-1, -1);
@@ -270,29 +280,19 @@ public class BattleField extends Applet implements Runnable, MouseListener, Mous
 	}
 
 	public void mousePressed(MouseEvent e) {
+		pointA.x = e.getX();
+		pointA.y = e.getY();
 	}
 
 	public void mouseReleased(MouseEvent e) {
 	}
 
 	public void mouseDragged(MouseEvent e) {
+		pointB.x = e.getX();
+		pointB.y = e.getY();
 	}
 
 	public void mouseMoved(MouseEvent e) {
-
-		pointA.x = redLeader.getPosition().x;
-		pointA.y = redLeader.getPosition().y;
-
-		pointB.x = e.getX();
-		pointB.y = e.getY();
-
-		Path path = surface.solve(pointA, pointB);
-
-		if (path != null) {
-			redLeader.setTarget(path.getPoints().getFirst());
-		}
-
-		repaint();
 	}
 
 	@Override
@@ -312,7 +312,7 @@ public class BattleField extends Applet implements Runnable, MouseListener, Mous
 			redLeader.setFormationOrder(Leader.FORMATION_WING);
 		}
 		
-		if (e.getKeyCode() == KeyEvent.VK_B) {
+		if (e.getKeyCode() == KeyEvent.VK_C) {
 			// Shield formation
 			redLeader.setFormationOrder(Leader.FORMATION_SHIELD);
 		}

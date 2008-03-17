@@ -18,6 +18,16 @@ public class Path {
 		solved = s;
 		path = new LinkedList<Waypoint>();
 	}
+	
+	public Path(Path p){
+		distance = p.distance;
+		solved = p.solved;
+		path = new LinkedList<Waypoint>();
+		
+		for(Waypoint wp : p.path){
+			path.add(new Waypoint(new Point2d(wp.getPosition())));
+		}
+	}
 
 	public void constructPath(Hashtable<Point2d, Point2d> pere, Point2d depart, Point2d arrive) {
 		Point2d p = arrive;
