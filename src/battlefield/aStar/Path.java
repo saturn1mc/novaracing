@@ -5,7 +5,8 @@ import java.util.LinkedList;
 
 import javax.vecmath.Point2d;
 
-import elements.Waypoint;
+import battlefield.surface.Waypoint;
+
 
 public class Path {
 	private boolean solved;

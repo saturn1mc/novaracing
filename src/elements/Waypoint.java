@@ -9,7 +9,7 @@ import java.awt.Graphics2D;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
-import Battlefield.bots.Bot;
+import environment.Environment;
 
 /**
  * @author camille
@@ -182,5 +182,10 @@ public class Waypoint extends Element {
 	@Override
 	public String toString() {
 		return "Waypoint(" + name + ") : " + position.x + " - " + position.y;
+	}
+
+	@Override
+	public void update(Environment env) {
+		// nothing...
 	}
 }

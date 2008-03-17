@@ -12,8 +12,6 @@ import javax.vecmath.Vector2d;
 import battlefield.aStar.AStar;
 import battlefield.aStar.Path;
 
-import elements.Waypoint;
-
 public class Surface {
 
 	public int wxsize, wysize;

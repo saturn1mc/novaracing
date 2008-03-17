@@ -1,13 +1,13 @@
 /**
  * 
  */
-package elements;
+package battlefield.surface;
 
 import java.awt.Graphics2D;
 
 import javax.vecmath.Point2d;
 
-import environment.Environment;
+import battlefield.BattleField;
 
 /**
  * @author camille
@@ -38,10 +38,10 @@ public abstract class Element {
 	public abstract void draw(Graphics2D g2d);
 	
 	/**
-	 * Update the element on each frame
+	 * Updates the element on each frame
 	 * @param env
 	 */
-	public abstract void update(Environment env);
+	public abstract void update(BattleField env);
 
 	public String getName() {
 		return name;
@@ -60,30 +60,4 @@ public abstract class Element {
 	}
 	
 	public double getRadius(){return 0.0d;}
-	
-	/**
-	 * Avoidance indicator for a {@link Vehicle}
-	 * @param vehicle
-	 * @return <code>true</code> if the element must be avoided or else false
-	 */
-	public boolean avoidedBy(Vehicle vehicle){return false;}
-	
-	/**
-	 * Avoidance indicator for a {@link HumanVehicle}
-	 * @param vehicle
-	 * @return <code>true</code> if the element must be avoided or else false
-	 */
-	public boolean avoidedBy(HumanVehicle vehicle){return false;}
-	
-	/**
-	 * Effect on {@link Vehicle}.
-	 * @param vehicle
-	 */
-	public void effectOn(Vehicle vehicle){}
-	
-	/**
-	 * Effect on {@link HumanVehicle}
-	 * @param vehicle
-	 */
-	public void effectOn(HumanVehicle vehicle){}
 }

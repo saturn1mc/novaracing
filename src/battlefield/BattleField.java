@@ -18,10 +18,9 @@ import java.util.Random;
 import javax.vecmath.Point2d;
 
 import battlefield.aStar.Path;
+import battlefield.bots.Follower;
+import battlefield.bots.Leader;
 import battlefield.surface.Surface;
-
-import Battlefield.bots.Follower;
-import Battlefield.bots.Leader;
 
 public class BattleField extends Applet implements Runnable, MouseListener, MouseMotionListener, KeyListener {
 	/**
@@ -111,7 +110,7 @@ public class BattleField extends Applet implements Runnable, MouseListener, Mous
 		do {
 			repaint();
 			try {
-				Thread.sleep(10);
+				Thread.sleep(5);
 			} catch (InterruptedException _ex) {
 				_ex.printStackTrace();
 			}

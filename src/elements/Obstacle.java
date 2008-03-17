@@ -9,6 +9,8 @@ import java.awt.Graphics2D;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
+import environment.Environment;
+
 /**
  * @author camille
  *
@@ -62,5 +64,10 @@ public class Obstacle extends Element {
 			System.out.println(vehicle.getName() + " crashed");
 			vehicle.setSpeed(0);
 		}
+	}
+
+	@Override
+	public void update(Environment env) {
+		// nothing...
 	}
 }
