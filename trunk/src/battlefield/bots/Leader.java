@@ -187,11 +187,11 @@ public class Leader extends Bot {
 	}
 
 	private void updateState(BattleField env) {
-		if (this.life < 0.7){
-			currentState = STATE_WOUNDED;
-		} else if (this.currentWeapon.ammoLeft() < 5){
+		if (this.currentWeapon.ammoLeft() < 5){
 			currentState = STATE_RELOAD;
-		}
+		} else if (this.life < 0.7){
+			currentState = STATE_WOUNDED;
+		} 
 		switch (currentState) {
 
 		case STATE_SEARCHING:
