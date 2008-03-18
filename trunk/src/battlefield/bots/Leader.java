@@ -98,14 +98,9 @@ public class Leader extends Bot {
 	private Polygon sight;
 
 	/**
-	 * Current target
+	 * Current targeted enemy
 	 */
-	private Waypoint target;
-
-	/**
-	 * Current enemy
-	 */
-	private Leader enemy;
+	private Bot enemy;
 
 	/**
 	 * Latest registered follower
@@ -113,10 +108,8 @@ public class Leader extends Bot {
 	private LinkedList<Follower> followers;
 
 	/**
-	 * Bot's enemies
+	 * Orders to be given by the leader
 	 */
-	private LinkedList<Bot> enemies;
-
 	private int formationOrder;
 
 	/**
@@ -125,22 +118,14 @@ public class Leader extends Bot {
 	private double damages;
 
 	/**
-	 * Bot's current state
-	 */
-	private int currentState;
-
-	/**
-	 * Bot's current path
-	 */
-	private Path currentPath;
-
-	/**
 	 * Bot's color
 	 */
 	private Color color;
 
 	public Leader(String name, Point2d position, Color color, int formation) {
 		super(name, position);
+
+		this.bbox = new Rectangle((int) (position.x - (radius / 2.0d)), (int) (position.y - (radius / 2.0d)), (int) radius, (int) radius);
 
 		this.color = color;
 
@@ -193,16 +178,16 @@ public class Leader extends Bot {
 			sight.addPoint((int) (futurePosition.x - (side.x * radius)), (int) (futurePosition.y - (side.y * radius)));
 			sight.addPoint((int) (futurePosition.x + (side.x * radius)), (int) (futurePosition.y + (side.y * radius)));
 		}
+		
+		this.bbox.setLocation((int) (position.x - (radius / 2.0d)), (int) (position.y - (radius / 2.0d)));
 	}
 
 	private void updateState(BattleField env) {
 
-		Bot enemy;
-
 		switch (currentState) {
 
 		case STATE_SEARCHING:
-			
+
 			formationOrder = FORMATION_SQUARE;
 
 			if (target == null) {
@@ -252,6 +237,7 @@ public class Leader extends Bot {
 				target = new Waypoint(enemy.position);
 
 				shootEnemy(env, enemy);
+				
 			} else {
 				target = null;
 				currentState = STATE_SEARCHING;
@@ -284,24 +270,6 @@ public class Leader extends Bot {
 
 		default:
 			System.err.println("Unknown state : " + currentState);
-		}
-	}
-
-	private Bot enemyAtSight(BattleField env) {
-		for (Bot enemy : enemies) {
-			if (env.getSurface().canSee(position, enemy.position)) {
-				return enemy;
-			}
-		}
-
-		return null;
-	}
-
-	private void shootEnemy(BattleField env, Bot enemy) {
-		Vector2d aim = new Vector2d(enemy.position.x - position.x, enemy.position.y - position.y);
-
-		if (currentWeapon != null) {
-			currentWeapon.shoot(env, new Point2d(position.x, position.y), aim);
 		}
 	}
 
@@ -359,7 +327,7 @@ public class Leader extends Bot {
 			 * Correction to avoid exiting the area
 			 */
 			if (!env.getSurface().getArea().contains(futurePosition.x, futurePosition.y)) {
-				
+
 				Vector2d containmentCorrection = new Vector2d(0, 0);
 
 				if (futurePosition.x < (2.0d * radius)) {
@@ -459,11 +427,11 @@ public class Leader extends Bot {
 		this.speed = speed;
 	}
 
-	public Leader getEnemy() {
+	public Bot getEnemy() {
 		return enemy;
 	}
 
-	public void setEnemy(Leader enemy) {
+	public void setEnemy(Bot enemy) {
 		this.enemy = enemy;
 	}
 
@@ -495,11 +463,7 @@ public class Leader extends Bot {
 		return followers.size();
 	}
 
-	public void addEnemies(LinkedList<Bot> enemies) {
-		this.enemies.addAll(enemies);
-	}
-
-	public synchronized Point2d getTargetFor(Follower f) {
+	public synchronized Waypoint getTargetFor(Follower f) {
 
 		Point2d target;
 		Point2d reference;
@@ -563,7 +527,7 @@ public class Leader extends Bot {
 			break;
 		}
 
-		return target;
+		return new Waypoint(new Point2d(target.x, target.y));
 	}
 
 	public void setVelocity(Vector2d velocity) {

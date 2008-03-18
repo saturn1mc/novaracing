@@ -81,7 +81,7 @@ public class BattleField extends JPanel {
 		};
 
 		addMouseListener(mouse);
-		//addMouseMotionListener(mouse);
+		addMouseMotionListener(mouse);
 
 		this.keyboard = new KeyAdapter() {
 			@Override
@@ -158,10 +158,19 @@ public class BattleField extends JPanel {
 			blueTeam.add(f);
 		}
 
+		// Enemies
 		redLeader.addEnemies(blueTeam);
 		blueLeader.addEnemies(redTeam);
+		
+		for(Bot b : redTeam){
+			b.addEnemies(blueTeam);
+		}
+		
+		for(Bot b : blueTeam){
+			b.addEnemies(redTeam);
+		}
 
-		//WEAPON TEST
+		// WEAPON TEST
 		for (Bot b : redTeam) {
 			b.setCurrentWeapon(new Pistol(new Point2d(0, 0)));
 		}
@@ -196,6 +205,28 @@ public class BattleField extends JPanel {
 	}
 
 	public void updateBots() {
+		// See who's alive
+		LinkedList<Bot> deads = new LinkedList<Bot>();
+		
+		for (Bot b : redTeam) {
+			if(!b.isAlive()){
+				deads.add(b);
+			}
+		}
+
+		for (Bot b : blueTeam) {
+			if(!b.isAlive()){
+				deads.add(b);
+			}
+		}
+		
+		for(Bot dead : deads){
+			blueTeam.remove(dead);
+			redTeam.remove(dead);
+		}
+		
+		
+		// Draw survivors
 		for (Bot b : redTeam) {
 			b.update(this);
 		}
@@ -216,14 +247,18 @@ public class BattleField extends JPanel {
 	}
 
 	public void updateWeapons() {
+		
+		LinkedList<Bullet> toDelete = new LinkedList<Bullet>();
+		
 		for (Bullet b : flyingBullets) {
 			b.update(this);
+			if(!b.isFlying()){
+				toDelete.add(b);
+			}
 		}
 
-		for (Bullet b : flyingBullets) {
-			if (!b.isFlying()) {
-
-			}
+		for (Bullet b : toDelete) {
+			flyingBullets.remove(b);
 		}
 	}
 
@@ -234,9 +269,18 @@ public class BattleField extends JPanel {
 
 		for (Bullet b : flyingBullets) {
 			if (b.isFlying()) {
+				b.hitTest(this);
 				b.draw((Graphics2D) g);
 			}
 		}
+	}
+	
+	public LinkedList<Bot> getRedTeam() {
+		return redTeam;
+	}
+	
+	public LinkedList<Bot> getBlueTeam() {
+		return blueTeam;
 	}
 
 	public void fireBullet(Bullet bullet) {

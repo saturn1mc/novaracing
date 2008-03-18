@@ -6,12 +6,14 @@ package battlefield.weapons;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.LinkedList;
 
 import javax.swing.Timer;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
 import battlefield.BattleField;
+import battlefield.bots.Bot;
 
 /**
  * @author camille
@@ -20,8 +22,8 @@ import battlefield.BattleField;
 public class Pistol extends Weapon {
 
 	public static final String name = "Pistol";
-	public static int MAX_AMMO = 15;
-	public static int MAX_RANGE = 200;
+	public static int MAX_AMMO = 1000;
+	public static int MAX_RANGE = 300;
 	public static int FIRE_LATENCY = 1000;
 	public static double FIRE_STRENGTH = 10d;
 
@@ -44,14 +46,14 @@ public class Pistol extends Weapon {
 	}
 
 	@Override
-	public synchronized void shoot(BattleField env, Point2d origin, Vector2d direction) {
+	public synchronized void shoot(BattleField env, LinkedList<Bot> enemies, Point2d origin, Vector2d direction) {
 
 		if (canShoot()) {
 
 			bullets--;
 			
 			direction.normalize();
-			env.fireBullet(new Bullet(new Point2d(origin), direction, FIRE_STRENGTH, MAX_RANGE));
+			env.fireBullet(new Bullet(new Point2d(origin), enemies, direction, FIRE_STRENGTH, MAX_RANGE));
 			
 			setCooling(true);
 			

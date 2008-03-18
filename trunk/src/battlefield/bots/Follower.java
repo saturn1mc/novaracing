@@ -12,12 +12,17 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
 import battlefield.BattleField;
+import battlefield.aStar.Path;
+import battlefield.surface.Waypoint;
 
 /**
  * @author camille
  * 
  */
 public class Follower extends Bot {
+
+	public static final int STATE_SEARCHING = 0;
+	public static final int STATE_LEADED = 1;
 
 	/**
 	 * Vehicle's radius
@@ -88,7 +93,6 @@ public class Follower extends Bot {
 	 * Current targets
 	 */
 	private Leader leader;
-	private Point2d target;
 
 	/**
 	 * Damages
@@ -102,6 +106,8 @@ public class Follower extends Bot {
 
 	public Follower(String name, Point2d position, Color color) {
 		super(name, position);
+
+		this.bbox = new Rectangle((int) (position.x - (radius / 2.0d)), (int) (position.y - (radius / 2.0d)), (int) radius, (int) radius);
 
 		this.color = color;
 
@@ -120,9 +126,10 @@ public class Follower extends Bot {
 
 	@Override
 	public void update(BattleField env) {
-		if (leader != null) {
 
-			target = leader.getTargetFor(this);
+		updateState(env);
+
+		if (target != null) {
 
 			// TODO take the other elements effects into account
 			// (collision, bonuses, obstacles, ...)
@@ -146,6 +153,64 @@ public class Follower extends Bot {
 			sight.addPoint((int) (position.x - (side.x * radius)), (int) (position.y - (side.y * radius)));
 			sight.addPoint((int) (futurePosition.x - (side.x * radius)), (int) (futurePosition.y - (side.y * radius)));
 			sight.addPoint((int) (futurePosition.x + (side.x * radius)), (int) (futurePosition.y + (side.y * radius)));
+		}
+
+		this.bbox.setLocation((int) (position.x - (radius / 2.0d)), (int) (position.y - (radius / 2.0d)));
+	}
+
+	private void updateState(BattleField env) {
+
+		Bot enemy;
+
+		switch (currentState) {
+		case STATE_SEARCHING:
+			
+			if(leader!=null && leader.isAlive()){
+				currentState = STATE_LEADED;
+				updateState(env);
+			}
+			
+			if (target == null) {
+
+				while (currentPath == null || !currentPath.isSolved()) {
+
+					Point2d start = env.getSurface().getGraph().getRandomPoint();
+					Point2d stop = env.getSurface().getGraph().getRandomPoint();
+
+					currentPath = new Path(env.getSurface().solve(new Point2d(start.x, start.y), new Point2d(stop.x, stop.y)));
+				}
+
+				target = currentPath.getPoints().getFirst();
+
+			} else {
+				if (target.isReachedBy(this)) {
+					target = target.getNext();
+				}
+			}
+			
+			enemy = enemyAtSight(env);
+
+			if (enemy != null) {
+				target = new Waypoint(enemy.position);
+				shootEnemy(env, enemy);
+			}
+			
+			break;
+
+		case STATE_LEADED:
+			if (leader != null && leader.isAlive()) {
+				target = leader.getTargetFor(this);	
+				if(leader.getEnemy() != null){
+					shootEnemy(env, leader.getEnemy());
+				}
+			} else {
+				currentState = STATE_SEARCHING;
+				updateState(env);
+			}
+			break;
+
+		default:
+			System.err.println("Unknown state : " + currentState);
 		}
 	}
 
@@ -261,14 +326,14 @@ public class Follower extends Bot {
 
 				speed = getArrivalSpeed();
 
-				Vector2d targetCorrection = new Vector2d(target.x - futurePosition.x, target.y - futurePosition.y);
+				Vector2d targetCorrection = new Vector2d(target.getPosition().x - futurePosition.x, target.getPosition().y - futurePosition.y);
 				correction.add(targetCorrection);
 			}
 		}
 	}
 
 	private double getArrivalSpeed() {
-		Vector2d targetOffset = new Vector2d(target.x - position.x, target.y - position.y);
+		Vector2d targetOffset = new Vector2d(target.getPosition().x - position.x, target.getPosition().y - position.y);
 		double distance = targetOffset.length();
 
 		double rampedSpeed = maxSpeed * (distance / (radius * 4.0));
