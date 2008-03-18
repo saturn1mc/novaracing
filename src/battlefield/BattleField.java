@@ -14,30 +14,38 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.vecmath.Point2d;
 
+import battlefield.bonus.AmmoPoint;
+import battlefield.bonus.LifePoint;
 import battlefield.bots.Bot;
 import battlefield.bots.Follower;
 import battlefield.bots.Leader;
 import battlefield.surface.Surface;
+import battlefield.surface.Waypoint;
 import battlefield.weapons.Bullet;
 import battlefield.weapons.Pistol;
 import battlefield.weapons.Weapon;
 
 public class BattleField extends JPanel {
+	
 	/**
 	 * Generated SVUID
 	 */
 	private static final long serialVersionUID = 1L;
 
+	// Constants
 	public static final int WIDTH = 800;
 	public static final int HEIGHT = 600;
-	public static final int RED_TEAM_SIZE = 10;
-	public static final int BLUE_TEAM_SIZE = 3;
-
-	private boolean playing;
 	
+	public static final int RED_TEAM_SIZE = 9;
+	public static final int BLUE_TEAM_SIZE = 9;
+	
+	public static final int BONUS_POINTS_NB = 10;
+	
+	private boolean playing;
+
 	private Point2d pointA;
 	private Point2d pointB;
-	
+
 	private MouseAdapter mouse;
 	private KeyAdapter keyboard;
 
@@ -54,13 +62,16 @@ public class BattleField extends JPanel {
 	//Weapons
 	private LinkedList<Weapon> weaponsOnGround;
 	private LinkedList<Bullet> flyingBullets;
+	
+	//Bonus point
+	private LinkedList<Waypoint> bonusPoints;
 
 	public BattleField() {
 		super();
 		setDoubleBuffered(true);
 
 		setPreferredSize(new Dimension(WIDTH, HEIGHT));
-		
+
 		playing = false;
 
 		pointA = new Point2d();
@@ -72,7 +83,7 @@ public class BattleField extends JPanel {
 				pointA.x = e.getX();
 				pointA.y = e.getY();
 			}
-			
+
 			@Override
 			public void mouseDragged(MouseEvent e) {
 				pointB.x = e.getX();
@@ -117,20 +128,34 @@ public class BattleField extends JPanel {
 
 		initSurface();
 		initWeapons();
+		initBonuses();
 		initBots();
 
 	}
 
-	public void initSurface() {
+	private void initSurface() {
 		surface = new Surface(WIDTH, HEIGHT, 60);
 	}
 
-	public void initWeapons() {
+	private void initWeapons() {
 		weaponsOnGround = new LinkedList<Weapon>();
 		flyingBullets = new LinkedList<Bullet>();
 	}
+	
+	private void initBonuses(){
+		bonusPoints = new LinkedList<Waypoint>();
+		
+		for(int i = 0; i< BONUS_POINTS_NB; i++){
+			if(i%2 == 0){
+				bonusPoints.add(new LifePoint(surface.getGraph().getRandomPoint(), 10));
+			}
+			else{
+				bonusPoints.add(new AmmoPoint(surface.getGraph().getRandomPoint(), 100));
+			}
+		}
+	}
 
-	public void initBots() {
+	private void initBots() {
 
 		redTeam = new LinkedList<Bot>();
 		blueTeam = new LinkedList<Bot>();
@@ -161,12 +186,12 @@ public class BattleField extends JPanel {
 		// Enemies
 		redLeader.addEnemies(blueTeam);
 		blueLeader.addEnemies(redTeam);
-		
-		for(Bot b : redTeam){
+
+		for (Bot b : redTeam) {
 			b.addEnemies(blueTeam);
 		}
-		
-		for(Bot b : blueTeam){
+
+		for (Bot b : blueTeam) {
 			b.addEnemies(redTeam);
 		}
 
@@ -190,6 +215,10 @@ public class BattleField extends JPanel {
 
 		updateWeapons();
 		drawWeapons(g);
+		
+
+		updateBonusPoints();
+		drawBonusPoint(g);
 
 		updateBots();
 		drawBots(g);
@@ -204,28 +233,27 @@ public class BattleField extends JPanel {
 		}
 	}
 
-	public void updateBots() {
+	private void updateBots() {
 		// See who's alive
 		LinkedList<Bot> deads = new LinkedList<Bot>();
-		
+
 		for (Bot b : redTeam) {
-			if(!b.isAlive()){
+			if (!b.isAlive()) {
 				deads.add(b);
 			}
 		}
 
 		for (Bot b : blueTeam) {
-			if(!b.isAlive()){
+			if (!b.isAlive()) {
 				deads.add(b);
 			}
 		}
-		
-		for(Bot dead : deads){
+
+		for (Bot dead : deads) {
 			blueTeam.remove(dead);
 			redTeam.remove(dead);
 		}
-		
-		
+
 		// Draw survivors
 		for (Bot b : redTeam) {
 			b.update(this);
@@ -236,7 +264,7 @@ public class BattleField extends JPanel {
 		}
 	}
 
-	public void drawBots(Graphics g) {
+	private void drawBots(Graphics g) {
 		for (Bot b : redTeam) {
 			b.draw((Graphics2D) g);
 		}
@@ -246,13 +274,13 @@ public class BattleField extends JPanel {
 		}
 	}
 
-	public void updateWeapons() {
-		
+	private void updateWeapons() {
+
 		LinkedList<Bullet> toDelete = new LinkedList<Bullet>();
-		
+
 		for (Bullet b : flyingBullets) {
 			b.update(this);
-			if(!b.isFlying()){
+			if (!b.isFlying()) {
 				toDelete.add(b);
 			}
 		}
@@ -262,7 +290,7 @@ public class BattleField extends JPanel {
 		}
 	}
 
-	public void drawWeapons(Graphics g) {
+	private void drawWeapons(Graphics g) {
 		for (Weapon w : weaponsOnGround) {
 			w.draw((Graphics2D) g);
 		}
@@ -275,10 +303,20 @@ public class BattleField extends JPanel {
 		}
 	}
 	
+	private void updateBonusPoints(){
+		//TODO
+	}
+	
+	private void drawBonusPoint(Graphics g){
+		for(Waypoint bp : bonusPoints){
+			bp.draw((Graphics2D)g);
+		}
+	}
+
 	public LinkedList<Bot> getRedTeam() {
 		return redTeam;
 	}
-	
+
 	public LinkedList<Bot> getBlueTeam() {
 		return blueTeam;
 	}
@@ -301,6 +339,30 @@ public class BattleField extends JPanel {
 
 	public synchronized boolean playing() {
 		return playing;
+	}
+	
+	public LifePoint getPainKiller(){
+		for(Waypoint w: bonusPoints){
+			if (w instanceof LifePoint){
+				LifePoint lp = (LifePoint) w;
+				if ( lp.getLife() > 0 ){
+					return lp;
+				}
+			}
+		}
+		return null;
+	}
+	
+	public AmmoPoint getReload(){
+		for(Waypoint w: bonusPoints){
+			if (w instanceof AmmoPoint){
+				AmmoPoint ap = (AmmoPoint) w;
+				if ( ap.getAmmo() > 0){
+					return ap;
+				}
+			}
+		}
+		return null;
 	}
 
 	public synchronized void setPlaying(boolean playing) {
@@ -325,7 +387,7 @@ public class BattleField extends JPanel {
 				} while (true);
 			}
 		};
-		
+
 		return aT;
 	}
 
@@ -343,7 +405,7 @@ public class BattleField extends JPanel {
 		f.setLocationRelativeTo(null);
 
 		f.setVisible(true);
-		
+
 		bf.getAnimationThread().start();
 	}
 }

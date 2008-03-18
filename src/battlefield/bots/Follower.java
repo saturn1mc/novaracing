@@ -23,6 +23,8 @@ public class Follower extends Bot {
 
 	public static final int STATE_SEARCHING = 0;
 	public static final int STATE_LEADED = 1;
+	public static final int STATE_RELOAD = 2;
+	public static final int STATE_WOUNDED = 3;
 
 	/**
 	 * Vehicle's radius
@@ -161,7 +163,13 @@ public class Follower extends Bot {
 	private void updateState(BattleField env) {
 
 		Bot enemy;
-
+		System.out.println(this.currentWeapon.ammoLeft());
+		if (this.currentWeapon.ammoLeft() < 5){
+			currentState = STATE_RELOAD;
+		}
+		if (this.life < 0.4){
+			currentState = STATE_WOUNDED;
+		}
 		switch (currentState) {
 		case STATE_SEARCHING:
 			
@@ -191,7 +199,7 @@ public class Follower extends Bot {
 			enemy = enemyAtSight(env);
 
 			if (enemy != null) {
-				target = new Waypoint(enemy.position);
+				target = new Waypoint(new Point2d(enemy.position.x + (3.0d * radius), enemy.position.y + (3.0d * radius)));
 				shootEnemy(env, enemy);
 			}
 			
@@ -208,7 +216,14 @@ public class Follower extends Bot {
 				updateState(env);
 			}
 			break;
-
+		case STATE_RELOAD:
+			System.out.println("je veux reloader");
+			target = env.getReload();
+			break;
+		case STATE_WOUNDED:
+			target = env.getPainKiller();
+			break;
+			
 		default:
 			System.err.println("Unknown state : " + currentState);
 		}
