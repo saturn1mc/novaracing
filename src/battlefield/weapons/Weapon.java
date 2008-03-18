@@ -27,4 +27,5 @@ public abstract class Weapon extends Element{
 	public abstract int ammoLeft();
 	public abstract void shoot(BattleField env, LinkedList<Bot> enemies, Point2d origin, Vector2d direction);
 	public abstract void reload(int bullets);
+	public abstract int maxAmmo();
 }

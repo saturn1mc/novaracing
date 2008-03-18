@@ -13,6 +13,8 @@ import javax.vecmath.Vector2d;
 
 import battlefield.BattleField;
 import battlefield.aStar.Path;
+import battlefield.bonus.AmmoPoint;
+import battlefield.bonus.LifePoint;
 import battlefield.surface.Waypoint;
 
 /**
@@ -163,13 +165,12 @@ public class Follower extends Bot {
 	private void updateState(BattleField env) {
 
 		Bot enemy;
-		System.out.println(this.currentWeapon.ammoLeft());
-		if (this.currentWeapon.ammoLeft() < 5){
+		if (this.life < 0.7){
+			currentState = STATE_WOUNDED;
+		} else if (this.currentWeapon.ammoLeft() < 5){
 			currentState = STATE_RELOAD;
 		}
-		if (this.life < 0.4){
-			currentState = STATE_WOUNDED;
-		}
+		
 		switch (currentState) {
 		case STATE_SEARCHING:
 			
@@ -217,11 +218,34 @@ public class Follower extends Bot {
 			}
 			break;
 		case STATE_RELOAD:
-			System.out.println("je veux reloader");
-			target = env.getReload();
+			target = env.getReload(this);
+			enemy = enemyAtSight(env);
+
+			if (enemy != null) {
+				shootEnemy(env, enemy);
+			}			
+			
+			if (target != null && target.isReachedBy(this)){
+				AmmoPoint pt = (AmmoPoint) target;
+				pt.takeAmmo(this, this.getCurrentWeapon().maxAmmo());
+				
+			}
+			currentState = STATE_LEADED;
 			break;
 		case STATE_WOUNDED:
-			target = env.getPainKiller();
+			
+			target = env.getPainKiller(this);
+			enemy = enemyAtSight(env);
+			
+			if (enemy != null) {
+				shootEnemy(env, enemy);
+			}			
+			if (target != null && target.isReachedBy(this)){
+				LifePoint pt = (LifePoint) target;
+				pt.takeLife(this, 1-this.getLife());
+				
+			}	
+			currentState = STATE_LEADED;
 			break;
 			
 		default:

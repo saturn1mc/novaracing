@@ -29,6 +29,8 @@ public class LifePoint extends Waypoint{
 		double lifeGiven = Math.min(life, lifeWanted);
 		bot.heal(lifeGiven);
 		life -= lifeGiven;
+		System.out.println(bot.getName() + " s'est soigné, a maintenant :" + bot.getLife());
+		System.out.println(life + " vie restante");		
 	}
 	
 	@Override

@@ -29,6 +29,7 @@ public class AmmoPoint extends Waypoint{
 		int ammoGiven = Math.min(ammo, ammoWanted);
 		bot.getCurrentWeapon().reload(ammoGiven);
 		ammo -= ammoGiven;
+
 	}
 	
 	@Override

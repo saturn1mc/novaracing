@@ -94,6 +94,10 @@ public class Pistol extends Weapon {
 		//TODO
 	}
 
+	public int maxAmmo(){
+		return MAX_AMMO;
+	}
+	
 	@Override
 	public void update(BattleField env) {
 		// nothing...
