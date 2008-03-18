@@ -22,7 +22,7 @@ import battlefield.bots.Bot;
 public class Pistol extends Weapon {
 
 	public static final String name = "Pistol";
-	public static int MAX_AMMO = 1000;
+	public static int MAX_AMMO = 10;
 	public static int MAX_RANGE = 300;
 	public static int FIRE_LATENCY = 1000;
 	public static double FIRE_STRENGTH = 10d;
@@ -39,7 +39,7 @@ public class Pistol extends Weapon {
 	public synchronized int ammoLeft() {
 		return bullets;
 	}
-
+	
 	@Override
 	public int fireLatency() {
 		return FIRE_LATENCY;

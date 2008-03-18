@@ -140,6 +140,10 @@ public abstract class Bot {
 		this.life -= damage;
 	}
 
+	public void heal(double life) {
+		this.life += life;
+	}
+
 	public double getRadius() {
 		return 0.0d;
 	}
@@ -150,6 +154,10 @@ public abstract class Bot {
 
 	public void addEnemies(LinkedList<Bot> enemies) {
 		this.enemies.addAll(enemies);
+	}
+
+	public Weapon getCurrentWeapon() {
+		return currentWeapon;
 	}
 
 	public void setCurrentWeapon(Weapon currentWeapon) {
