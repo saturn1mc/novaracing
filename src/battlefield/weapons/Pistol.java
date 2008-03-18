@@ -22,7 +22,7 @@ import battlefield.bots.Bot;
 public class Pistol extends Weapon {
 
 	public static final String name = "Pistol";
-	public static int MAX_AMMO = 10;
+	public static int MAX_AMMO = 20;
 	public static int MAX_RANGE = 300;
 	public static int FIRE_LATENCY = 1000;
 	public static double FIRE_STRENGTH = 10d;

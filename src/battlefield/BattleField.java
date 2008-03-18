@@ -148,10 +148,16 @@ public class BattleField extends JPanel {
 		
 		for(int i = 0; i< BONUS_POINTS_NB; i++){
 			if(i%2 == 0){
-				bonusPoints.add(new LifePoint(surface.getGraph().getRandomPoint(), 10));
+				Point2d p = surface.getGraph().getRandomPoint();
+				if ( surface.goodPoint(p)){
+					bonusPoints.add(new LifePoint(p, 10));
+				}
 			}
 			else{
-				bonusPoints.add(new AmmoPoint(surface.getGraph().getRandomPoint(), 100));
+				Point2d p = surface.getGraph().getRandomPoint();
+				if ( surface.goodPoint(p)){
+					bonusPoints.add(new AmmoPoint(p, 100));
+				}
 			}
 		}
 	}
