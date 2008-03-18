@@ -167,4 +167,8 @@ public abstract class Bot {
 	public boolean isAlive() {
 		return life > 0;
 	}
+	
+	public double getLife() {
+		return life;
+	}
 }

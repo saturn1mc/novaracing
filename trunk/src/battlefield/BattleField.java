@@ -14,6 +14,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.vecmath.Point2d;
 
+import battlefield.aStar.AStar;
 import battlefield.bonus.AmmoPoint;
 import battlefield.bonus.LifePoint;
 import battlefield.bots.Bot;
@@ -341,28 +342,36 @@ public class BattleField extends JPanel {
 		return playing;
 	}
 	
-	public LifePoint getPainKiller(){
+	public LifePoint getPainKiller(Bot b){
+		double distance_min = Double.MAX_VALUE;
+		LifePoint result = null;
 		for(Waypoint w: bonusPoints){
 			if (w instanceof LifePoint){
 				LifePoint lp = (LifePoint) w;
-				if ( lp.getLife() > 0 ){
-					return lp;
+				double distance = AStar.distance(lp.getPosition(), b.getPosition());
+				if ( lp.getLife() > 0 && distance_min > distance){
+					distance_min = distance;
+					result = lp;
 				}
 			}
 		}
-		return null;
+		return result;
 	}
 	
-	public AmmoPoint getReload(){
+	public AmmoPoint getReload(Bot b){
+		double distance_min = Double.MAX_VALUE;
+		AmmoPoint result = null;
 		for(Waypoint w: bonusPoints){
 			if (w instanceof AmmoPoint){
 				AmmoPoint ap = (AmmoPoint) w;
-				if ( ap.getAmmo() > 0){
-					return ap;
+				double distance = AStar.distance(ap.getPosition(), b.getPosition());
+				if ( ap.getAmmo() > 0 && distance_min > distance){
+					distance_min = distance;
+					result = ap;
 				}
 			}
 		}
-		return null;
+		return result;
 	}
 
 	public synchronized void setPlaying(boolean playing) {
