@@ -28,7 +28,6 @@ public class Surface {
 		objects = new LinkedList<Polygon>();
 
 		//Obstacles
-
 		Polygon p1 = new Polygon();
 		p1.addPoint(100, 200);
 		p1.addPoint(100, 250);
