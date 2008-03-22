@@ -14,8 +14,8 @@ import javax.vecmath.Vector2d;
 
 import battlefield.BattleField;
 import battlefield.aStar.Path;
-import battlefield.bonus.AmmoPoint;
-import battlefield.bonus.LifePoint;
+import battlefield.bonuses.AmmoPoint;
+import battlefield.bonuses.LifePoint;
 import battlefield.surface.Waypoint;
 
 /**

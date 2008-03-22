@@ -1,7 +1,7 @@
 /**
  * 
  */
-package battlefield.bonus;
+package battlefield.bonuses;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
