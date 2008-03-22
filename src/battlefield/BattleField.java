@@ -35,37 +35,99 @@ public class BattleField extends JFrame {
 	private static final long serialVersionUID = 1L;
 
 	// Constants
+	/**
+	 * Frame width
+	 */
 	public static final int WIDTH = 800;
+
+	/**
+	 * Frame height
+	 */
 	public static final int HEIGHT = 600;
 
+	/**
+	 * Number of unit in the red team (excluding the leader)
+	 */
 	public static final int RED_TEAM_SIZE = 9;
+
+	/**
+	 * Number of unit in the blue team (excluding the leader)
+	 */
 	public static final int BLUE_TEAM_SIZE = 9;
 
+	/**
+	 * Number of bonus point on the map
+	 */
 	public static final int BONUS_POINTS_NB = 20;
 
-	private boolean playing;
+	// Interactions
+	/**
+	 * True if the animation must be played
+	 */
+	private boolean play;
 
+	/**
+	 * Mouse adapter for the Frame
+	 */
 	private MouseAdapter mouse;
+
+	/**
+	 * Keyboard adapter for the Frame
+	 */
 	private KeyAdapter keyboard;
 
 	// Environment
+	/**
+	 * The battlefield {@link Surface}
+	 */
 	private Surface surface;
 
 	// Teams
+	/**
+	 * Red team {@link Leader} bot
+	 */
 	private Leader redLeader;
+
+	/**
+	 * Red team {@link Follower} list
+	 */
 	private LinkedList<Bot> redTeam;
 
+	/**
+	 * Blue {@link Leader} bot
+	 */
 	private Leader blueLeader;
+
+	/**
+	 * Blue team {@link Follower} list
+	 */
 	private LinkedList<Bot> blueTeam;
 
 	// Weapons
+	/**
+	 * Weapons available on the battlefield
+	 */
 	private LinkedList<Weapon> weaponsOnGround;
+
+	/**
+	 * List of {@link Bullet} that have been shot and still flying
+	 */
 	private LinkedList<Bullet> flyingBullets;
 
 	// Bonus point
+	/**
+	 * {@link LifePoint} list
+	 */
 	private LinkedList<LifePoint> lifePoints;
+
+	/**
+	 * {@link AmmoPoint} list
+	 */
 	private LinkedList<AmmoPoint> ammoPoints;
 
+	/**
+	 * Default (and currently the only) constructor for the {@link BattleField}
+	 */
 	public BattleField() {
 		super("Battlefield - Boutet, Maurice 2008");
 
@@ -74,7 +136,7 @@ public class BattleField extends JFrame {
 		this.setResizable(false);
 		this.setLocationRelativeTo(null);
 
-		playing = false;
+		play = false;
 
 		this.mouse = new MouseAdapter() {
 			@Override
@@ -116,7 +178,7 @@ public class BattleField extends JFrame {
 
 				if (e.getKeyCode() == KeyEvent.VK_SPACE) {
 					// Play / Pause
-					setPlaying(!playing());
+					setPlay(!playing());
 				}
 			}
 		};
@@ -138,15 +200,24 @@ public class BattleField extends JFrame {
 		}
 	}
 
+	/**
+	 * Initializes the {@link Surface}
+	 */
 	private void initSurface() {
 		surface = new Surface(WIDTH, HEIGHT, 60);
 	}
 
+	/**
+	 * Initializes the {@link Weapon} and {@link Bullet} lists
+	 */
 	private void initWeapons() {
 		weaponsOnGround = new LinkedList<Weapon>();
 		flyingBullets = new LinkedList<Bullet>();
 	}
 
+	/**
+	 * Initializes bonus points ({@link LifePoint} and {@link AmmoPoint})
+	 */
 	private void initBonuses() {
 
 		// Life points
@@ -183,6 +254,9 @@ public class BattleField extends JFrame {
 
 	}
 
+	/**
+	 * Initializes the teams
+	 */
 	private void initBots() {
 
 		redTeam = new LinkedList<Bot>();
@@ -234,6 +308,10 @@ public class BattleField extends JFrame {
 		//
 	}
 
+	/**
+	 * Updates the {@link Weapon} and {@link Bullet} lists (removes picked
+	 * weapon and non flying bullets if any)
+	 */
 	private void updateWeapons() {
 
 		LinkedList<Bullet> toDelete = new LinkedList<Bullet>();
@@ -250,6 +328,10 @@ public class BattleField extends JFrame {
 		}
 	}
 
+	/**
+	 * Updates the bonus points (removes empty {@link AmmoPoint} and
+	 * {@link LifePoint} if any)
+	 */
 	private void updateBonusPoints() {
 
 		LinkedList<Waypoint> emptyPoints = new LinkedList<Waypoint>();
@@ -272,6 +354,9 @@ public class BattleField extends JFrame {
 		}
 	}
 
+	/**
+	 * Updates very {@link Bot}
+	 */
 	private void updateBots() {
 		// See who's alive
 		LinkedList<Bot> deads = new LinkedList<Bot>();
@@ -303,6 +388,11 @@ public class BattleField extends JFrame {
 		}
 	}
 
+	/**
+	 * Calls draw method for every {@link Bullet} and {@link Weapon}
+	 * 
+	 * @param g
+	 */
 	private void drawWeapons(Graphics g) {
 		for (Weapon w : weaponsOnGround) {
 			w.draw((Graphics2D) g);
@@ -316,6 +406,11 @@ public class BattleField extends JFrame {
 		}
 	}
 
+	/**
+	 * Calls draw method for every {@link LifePoint} and {@link AmmoPoint}
+	 * 
+	 * @param g
+	 */
 	private void drawBonusPoint(Graphics g) {
 		for (LifePoint lp : lifePoints) {
 			lp.draw((Graphics2D) g);
@@ -326,6 +421,11 @@ public class BattleField extends JFrame {
 		}
 	}
 
+	/**
+	 * Calls draw method for every {@link Bot}
+	 * 
+	 * @param g
+	 */
 	private void drawBots(Graphics g) {
 		for (Bot b : redTeam) {
 			b.draw((Graphics2D) g);
@@ -336,6 +436,10 @@ public class BattleField extends JFrame {
 		}
 	}
 
+	/**
+	 * Battlefield drawing method (uses {@link BufferStrategy} to optimize
+	 * rendering speed)
+	 */
 	private void drawBattlefield() {
 
 		BufferStrategy bf = this.getBufferStrategy();
@@ -360,7 +464,16 @@ public class BattleField extends JFrame {
 		}
 	}
 
-	private void drawInfo(String info) {
+	/**
+	 * Draws an info over the {@link BattleField}
+	 * 
+	 * @param info
+	 *            the string to show
+	 * @param obscureBattlefield
+	 *            true if the {@link BattleField} must be obscured, or else
+	 *            false
+	 */
+	private void drawInfo(String info, boolean obscureBattlefield) {
 		BufferStrategy bf = this.getBufferStrategy();
 
 		if (bf != null) {
@@ -371,10 +484,16 @@ public class BattleField extends JFrame {
 			drawBonusPoint(g);
 			drawBots(g);
 
-			g.setColor(new Color(0, 0, 0, 0.8f));
-			g.fillRect(0, 0, WIDTH, HEIGHT);
+			if (obscureBattlefield) {
+				g.setColor(new Color(0, 0, 0, 0.8f));
+				g.fillRect(0, 0, WIDTH, HEIGHT);
 
-			g.setColor(Color.white);
+				g.setColor(Color.white);
+			}
+			else{
+				g.setColor(Color.black);
+			}
+			
 			int infoStrWidth = g.getFontMetrics().stringWidth(info);
 			g.drawString(info, (WIDTH / 2) - (infoStrWidth / 2), HEIGHT / 2);
 
@@ -388,6 +507,11 @@ public class BattleField extends JFrame {
 		}
 	}
 
+	/**
+	 * Getter for the nearest {@link LifePoint} from a given {@link Bot}
+	 * @param b the given {@link Bot}
+	 * @return the nearest {@link LifePoint} if any, or else <code>null</code>
+	 */
 	public LifePoint getPainKiller(Bot b) {
 		double distance_min = Double.MAX_VALUE;
 		LifePoint result = null;
@@ -401,6 +525,11 @@ public class BattleField extends JFrame {
 		return result;
 	}
 
+	/**
+	 * Getter for the nearest {@link AmmoPoint} from a given {@link Bot}
+	 * @param b the given {@link Bot}
+	 * @return the nearest {@link AmmoPoint} if any, or else <code>null</code>
+	 */
 	public AmmoPoint getReload(Bot b) {
 		double distance_min = Double.MAX_VALUE;
 		AmmoPoint result = null;
@@ -440,13 +569,17 @@ public class BattleField extends JFrame {
 	}
 
 	public synchronized boolean playing() {
-		return playing;
+		return play;
 	}
 
-	public synchronized void setPlaying(boolean playing) {
-		this.playing = playing;
+	public synchronized void setPlay(boolean play) {
+		this.play = play;
 	}
 
+	/**
+	 * The {@link BattleField} animation thread
+	 * @return
+	 */
 	public Thread getAnimationThread() {
 		Thread aT = new Thread() {
 			@Override
@@ -462,7 +595,7 @@ public class BattleField extends JFrame {
 							drawBattlefield();
 
 						} else {
-							drawInfo("Press 'space' to play");
+							drawInfo("Press 'space' to play", true);
 						}
 					}
 
