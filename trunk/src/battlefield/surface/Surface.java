@@ -13,6 +13,8 @@ import battlefield.aStar.AStar;
 import battlefield.aStar.Path;
 
 public class Surface {
+	
+	private static final int GOOD_POINT_DIST = 30;
 
 	private Rectangle area;
 	private LinkedList<Polygon> objects; // The objects on the surface
@@ -33,14 +35,7 @@ public class Surface {
 		p1.addPoint(200, 250);
 		p1.addPoint(200, 200);
 		objects.add(p1);
-
-		Polygon p2 = new Polygon();
-		p2.addPoint(300, 500);
-		p2.addPoint(300, 550);
-		p2.addPoint(320, 550);
-		p2.addPoint(320, 500);
-		objects.add(p2);
-
+		
 		Polygon p3 = new Polygon();
 		p3.addPoint(400, 200);
 		p3.addPoint(300, 250);
@@ -117,7 +112,12 @@ public class Surface {
 
 	public boolean goodPoint(Point2d pt) {
 		for (Polygon p : objects) {
-			if (p.contains(pt.x, pt.y)) {
+			
+			Rectangle r = p.getBounds();
+			Point2d center = new Point2d(r.getCenterX(), r.getCenterY());
+			Vector2d boundsDistance = new Vector2d(pt.x - center.x, pt.y - center.y);
+			
+			if (boundsDistance.length() <= (Math.max(r.width, r.height) + GOOD_POINT_DIST)) {
 				return false;
 			}
 		}
