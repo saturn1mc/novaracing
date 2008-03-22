@@ -4,14 +4,15 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Toolkit;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferStrategy;
 import java.util.LinkedList;
 
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 import javax.vecmath.Point2d;
 
 import battlefield.aStar.AStar;
@@ -26,8 +27,8 @@ import battlefield.weapons.Bullet;
 import battlefield.weapons.Pistol;
 import battlefield.weapons.Weapon;
 
-public class BattleField extends JPanel {
-	
+public class BattleField extends JFrame {
+
 	/**
 	 * Generated SVUID
 	 */
@@ -36,12 +37,12 @@ public class BattleField extends JPanel {
 	// Constants
 	public static final int WIDTH = 800;
 	public static final int HEIGHT = 600;
-	
+
 	public static final int RED_TEAM_SIZE = 9;
 	public static final int BLUE_TEAM_SIZE = 9;
-	
+
 	public static final int BONUS_POINTS_NB = 10;
-	
+
 	private boolean playing;
 
 	private Point2d pointA;
@@ -63,15 +64,16 @@ public class BattleField extends JPanel {
 	//Weapons
 	private LinkedList<Weapon> weaponsOnGround;
 	private LinkedList<Bullet> flyingBullets;
-	
+
 	//Bonus point
 	private LinkedList<Waypoint> bonusPoints;
 
 	public BattleField() {
-		super();
-		setDoubleBuffered(true);
+		super("Battlefield - Boutet, Maurice 2008");
 
-		setPreferredSize(new Dimension(WIDTH, HEIGHT));
+		this.setPreferredSize(new Dimension(WIDTH, HEIGHT));
+		this.pack();
+		this.setResizable(false);
 
 		playing = false;
 
@@ -131,7 +133,15 @@ public class BattleField extends JPanel {
 		initWeapons();
 		initBonuses();
 		initBots();
+	}
 
+	@Override
+	public void setVisible(boolean b) {
+		super.setVisible(b);
+
+		if (b) {
+			this.createBufferStrategy(2); //Buffering
+		}
 	}
 
 	private void initSurface() {
@@ -142,20 +152,19 @@ public class BattleField extends JPanel {
 		weaponsOnGround = new LinkedList<Weapon>();
 		flyingBullets = new LinkedList<Bullet>();
 	}
-	
-	private void initBonuses(){
+
+	private void initBonuses() {
 		bonusPoints = new LinkedList<Waypoint>();
-		
-		for(int i = 0; i< BONUS_POINTS_NB; i++){
-			if(i%2 == 0){
+
+		for (int i = 0; i < BONUS_POINTS_NB; i++) {
+			if (i % 2 == 0) {
 				Point2d p = surface.getGraph().getRandomPoint();
-				if ( surface.goodPoint(p)){
+				if (surface.goodPoint(p)) {
 					bonusPoints.add(new LifePoint(p, 10));
 				}
-			}
-			else{
+			} else {
 				Point2d p = surface.getGraph().getRandomPoint();
-				if ( surface.goodPoint(p)){
+				if (surface.goodPoint(p)) {
 					bonusPoints.add(new AmmoPoint(p, 100));
 				}
 			}
@@ -213,31 +222,24 @@ public class BattleField extends JPanel {
 		//
 	}
 
-	@Override
-	protected void paintComponent(Graphics g) {
-		super.paintComponent(g);
-		g.clearRect(0, 0, WIDTH, HEIGHT);
+	private void updateWeapons() {
 
-		surface.draw(g);
+		LinkedList<Bullet> toDelete = new LinkedList<Bullet>();
 
-		updateWeapons();
-		drawWeapons(g);
-		
-
-		updateBonusPoints();
-		drawBonusPoint(g);
-
-		updateBots();
-		drawBots(g);
-
-		if ((pointA.x > -1) && (pointB.x > -1)) {
-			if (surface.canSee(pointA, pointB)) {
-				g.setColor(Color.green);
-			} else {
-				g.setColor(Color.red);
+		for (Bullet b : flyingBullets) {
+			b.update(this);
+			if (!b.isFlying()) {
+				toDelete.add(b);
 			}
-			g.drawLine((int) pointA.x, (int) pointA.y, (int) pointB.x, (int) pointB.y);
 		}
+
+		for (Bullet b : toDelete) {
+			flyingBullets.remove(b);
+		}
+	}
+
+	private void updateBonusPoints() {
+		//TODO
 	}
 
 	private void updateBots() {
@@ -271,32 +273,6 @@ public class BattleField extends JPanel {
 		}
 	}
 
-	private void drawBots(Graphics g) {
-		for (Bot b : redTeam) {
-			b.draw((Graphics2D) g);
-		}
-
-		for (Bot b : blueTeam) {
-			b.draw((Graphics2D) g);
-		}
-	}
-
-	private void updateWeapons() {
-
-		LinkedList<Bullet> toDelete = new LinkedList<Bullet>();
-
-		for (Bullet b : flyingBullets) {
-			b.update(this);
-			if (!b.isFlying()) {
-				toDelete.add(b);
-			}
-		}
-
-		for (Bullet b : toDelete) {
-			flyingBullets.remove(b);
-		}
-	}
-
 	private void drawWeapons(Graphics g) {
 		for (Weapon w : weaponsOnGround) {
 			w.draw((Graphics2D) g);
@@ -309,15 +285,86 @@ public class BattleField extends JPanel {
 			}
 		}
 	}
-	
-	private void updateBonusPoints(){
-		//TODO
-	}
-	
-	private void drawBonusPoint(Graphics g){
-		for(Waypoint bp : bonusPoints){
-			bp.draw((Graphics2D)g);
+
+	private void drawBonusPoint(Graphics g) {
+		for (Waypoint bp : bonusPoints) {
+			bp.draw((Graphics2D) g);
 		}
+	}
+
+	private void drawBots(Graphics g) {
+		for (Bot b : redTeam) {
+			b.draw((Graphics2D) g);
+		}
+
+		for (Bot b : blueTeam) {
+			b.draw((Graphics2D) g);
+		}
+	}
+
+	private void drawBattlefield() {
+
+		BufferStrategy bf = this.getBufferStrategy();
+		Graphics g = bf.getDrawGraphics();
+
+		g.clearRect(0, 0, WIDTH, HEIGHT);
+
+		surface.draw(g);
+
+		updateWeapons();
+		drawWeapons(g);
+
+		updateBonusPoints();
+		drawBonusPoint(g);
+
+		updateBots();
+		drawBots(g);
+
+		if ((pointA.x > -1) && (pointB.x > -1)) {
+			if (surface.canSee(pointA, pointB)) {
+				g.setColor(Color.green);
+			} else {
+				g.setColor(Color.red);
+			}
+			g.drawLine((int) pointA.x, (int) pointA.y, (int) pointB.x, (int) pointB.y);
+		}
+
+		bf.show();
+
+		//Tell the System to do the Drawing now, otherwise it can take a few extra ms until drawing is done
+		Toolkit.getDefaultToolkit().sync();
+	}
+
+	public LifePoint getPainKiller(Bot b) {
+		double distance_min = Double.MAX_VALUE;
+		LifePoint result = null;
+		for (Waypoint w : bonusPoints) {
+			if (w instanceof LifePoint) {
+				LifePoint lp = (LifePoint) w;
+				double distance = AStar.distance(lp.getPosition(), b.getPosition());
+				if (lp.getLife() > 0 && distance_min > distance) {
+					distance_min = distance;
+					result = lp;
+				}
+			}
+		}
+		return result;
+	}
+
+	public AmmoPoint getReload(Bot b) {
+		double distance_min = Double.MAX_VALUE;
+		AmmoPoint result = null;
+		for (Waypoint w : bonusPoints) {
+			if (w instanceof AmmoPoint) {
+				AmmoPoint ap = (AmmoPoint) w;
+				double distance = AStar.distance(ap.getPosition(), b.getPosition());
+				if (ap.getAmmo() > 0 && distance_min > distance) {
+					distance_min = distance;
+					result = ap;
+				}
+			}
+		}
+		return result;
 	}
 
 	public LinkedList<Bot> getRedTeam() {
@@ -347,38 +394,6 @@ public class BattleField extends JPanel {
 	public synchronized boolean playing() {
 		return playing;
 	}
-	
-	public LifePoint getPainKiller(Bot b){
-		double distance_min = Double.MAX_VALUE;
-		LifePoint result = null;
-		for(Waypoint w: bonusPoints){
-			if (w instanceof LifePoint){
-				LifePoint lp = (LifePoint) w;
-				double distance = AStar.distance(lp.getPosition(), b.getPosition());
-				if ( lp.getLife() > 0 && distance_min > distance){
-					distance_min = distance;
-					result = lp;
-				}
-			}
-		}
-		return result;
-	}
-	
-	public AmmoPoint getReload(Bot b){
-		double distance_min = Double.MAX_VALUE;
-		AmmoPoint result = null;
-		for(Waypoint w: bonusPoints){
-			if (w instanceof AmmoPoint){
-				AmmoPoint ap = (AmmoPoint) w;
-				double distance = AStar.distance(ap.getPosition(), b.getPosition());
-				if ( ap.getAmmo() > 0 && distance_min > distance){
-					distance_min = distance;
-					result = ap;
-				}
-			}
-		}
-		return result;
-	}
 
 	public synchronized void setPlaying(boolean playing) {
 		this.playing = playing;
@@ -390,7 +405,11 @@ public class BattleField extends JPanel {
 			public void run() {
 				do {
 					if (playing()) {
-						repaint();
+						updateWeapons();
+						updateBonusPoints();
+						updateBots();
+
+						drawBattlefield();
 					}
 
 					try {
@@ -408,19 +427,7 @@ public class BattleField extends JPanel {
 
 	public static void main(String args[]) {
 		BattleField bf = new BattleField();
-
-		JFrame f = new JFrame("Battlefield (beta)");
-
-		f.add(bf);
-		f.addMouseListener(bf.getMouse());
-		f.addMouseMotionListener(bf.getMouse());
-		f.addKeyListener(bf.getKeyboard());
-
-		f.pack();
-		f.setLocationRelativeTo(null);
-
-		f.setVisible(true);
-
 		bf.getAnimationThread().start();
+		bf.setVisible(true);
 	}
 }
