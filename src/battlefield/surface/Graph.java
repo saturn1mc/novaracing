@@ -20,7 +20,7 @@ import battlefield.BattleField;
 public class Graph {
 
 	public static final int PTS_RADIUS = 5;
-	private static final int BORDER = 50;
+	private static final int BORDER = 10;
 	private static final int WALL_DISTANCE = 5;
 	private static final int POINTS_PER_SEGMENT = 6;
 
