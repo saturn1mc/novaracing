@@ -16,8 +16,8 @@ import javax.swing.JFrame;
 import javax.vecmath.Point2d;
 
 import battlefield.aStar.AStar;
-import battlefield.bonus.AmmoPoint;
-import battlefield.bonus.LifePoint;
+import battlefield.bonuses.AmmoPoint;
+import battlefield.bonuses.LifePoint;
 import battlefield.bots.Bot;
 import battlefield.bots.Follower;
 import battlefield.bots.Leader;
