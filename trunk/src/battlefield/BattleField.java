@@ -18,6 +18,7 @@ import battlefield.bonuses.AmmoPoint;
 import battlefield.bonuses.LifePoint;
 import battlefield.bots.Bot;
 import battlefield.bots.Follower;
+import battlefield.bots.HumanLeader;
 import battlefield.bots.Leader;
 import battlefield.surface.Surface;
 import battlefield.surface.Waypoint;
@@ -31,6 +32,10 @@ public class BattleField extends JFrame {
 	 * Generated SVUID
 	 */
 	private static final long serialVersionUID = 1L;
+	
+	// Human leader
+	private static final boolean humanRedLeader = true;
+	private static final boolean humanBlueLeader = false;
 
 	// Constants
 	/**
@@ -46,12 +51,12 @@ public class BattleField extends JFrame {
 	/**
 	 * Number of unit in the red team (excluding the leader)
 	 */
-	public static final int RED_TEAM_SIZE = 9;
+	public static final int RED_TEAM_SIZE = 0;
 
 	/**
 	 * Number of unit in the blue team (excluding the leader)
 	 */
-	public static final int BLUE_TEAM_SIZE = 9;
+	public static final int BLUE_TEAM_SIZE = 0;
 
 	/**
 	 * Number of bonus point on the map
@@ -135,7 +140,7 @@ public class BattleField extends JFrame {
 			}
 		});
 
-		//TODO add listeners from human leader
+		// TODO add listeners from human leader
 
 		initSurface();
 		initWeapons();
@@ -173,7 +178,7 @@ public class BattleField extends JFrame {
 	private void initBonuses() {
 
 		LinkedList<Point2d> used = new LinkedList<Point2d>();
-		
+
 		// Life points
 		lifePoints = new LinkedList<LifePoint>();
 
@@ -219,7 +224,16 @@ public class BattleField extends JFrame {
 		blueTeam = new LinkedList<Bot>();
 
 		// Red team
-		redLeader = new Leader("RedLeader", new Point2d(100, 100), Color.red, Leader.FORMATION_SQUARE);
+		if (humanRedLeader) {
+			redLeader = new HumanLeader(this, "Nova", new Point2d(100, 100), Color.red, Leader.FORMATION_NONE);
+			this.addMouseListener(((HumanLeader) redLeader).getMouse());
+			this.addMouseMotionListener(((HumanLeader) redLeader).getMouse());
+			this.addKeyListener(((HumanLeader) redLeader).getKeyboard());
+			//
+		} else {
+			redLeader = new Leader("RedLeader", new Point2d(100, 100), Color.red, Leader.FORMATION_SQUARE);
+		}
+
 		redTeam.add(redLeader);
 
 		for (int i = 0; i < RED_TEAM_SIZE; i++) {
@@ -230,7 +244,17 @@ public class BattleField extends JFrame {
 		}
 
 		// Blue team
-		blueLeader = new Leader("BlueLeader", new Point2d(BattleField.WIDTH - 100, (BattleField.HEIGHT - 100)), Color.blue, Leader.FORMATION_SQUARE);
+		if (humanBlueLeader) {
+			blueLeader = new HumanLeader(this, "Nova", new Point2d(100, 100), Color.blue, Leader.FORMATION_NONE);
+			redTeam.add(blueLeader);
+			this.addMouseListener(((HumanLeader) blueLeader).getMouse());
+			this.addMouseMotionListener(((HumanLeader) blueLeader).getMouse());
+			this.addKeyListener(((HumanLeader) blueLeader).getKeyboard());
+			//
+		} else {
+			blueLeader = new Leader("BlueLeader", new Point2d(BattleField.WIDTH - 100, (BattleField.HEIGHT - 100)), Color.blue, Leader.FORMATION_SQUARE);
+		}
+		
 		blueTeam.add(blueLeader);
 
 		for (int i = 0; i < BLUE_TEAM_SIZE; i++) {
@@ -402,7 +426,7 @@ public class BattleField extends JFrame {
 
 		if (bf != null) {
 			Graphics g = bf.getDrawGraphics();
-			
+
 			g.clearRect(0, 0, WIDTH, HEIGHT);
 
 			surface.draw(g);
@@ -464,10 +488,12 @@ public class BattleField extends JFrame {
 
 	/**
 	 * Getter for the nearest {@link LifePoint} from a given {@link Bot}
-	 * @param b the given {@link Bot}
+	 * 
+	 * @param b
+	 *            the given {@link Bot}
 	 * @return the nearest {@link LifePoint} if any, or else <code>null</code>
 	 */
-	public LifePoint getPainKiller(Bot b) {
+	public LifePoint nearestLifePoint(Bot b) {
 		double distance_min = Double.MAX_VALUE;
 		LifePoint result = null;
 		for (LifePoint lp : lifePoints) {
@@ -482,10 +508,12 @@ public class BattleField extends JFrame {
 
 	/**
 	 * Getter for the nearest {@link AmmoPoint} from a given {@link Bot}
-	 * @param b the given {@link Bot}
+	 * 
+	 * @param b
+	 *            the given {@link Bot}
 	 * @return the nearest {@link AmmoPoint} if any, or else <code>null</code>
 	 */
-	public AmmoPoint getReload(Bot b) {
+	public AmmoPoint nearestAmmoPoint(Bot b) {
 		double distance_min = Double.MAX_VALUE;
 		AmmoPoint result = null;
 		for (AmmoPoint ap : ammoPoints) {
@@ -525,6 +553,7 @@ public class BattleField extends JFrame {
 
 	/**
 	 * The {@link BattleField} animation thread
+	 * 
 	 * @return
 	 */
 	public Thread getAnimationThread() {
