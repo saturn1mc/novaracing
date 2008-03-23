@@ -7,8 +7,6 @@ import java.awt.Graphics2D;
 import java.awt.Toolkit;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.image.BufferStrategy;
 import java.util.LinkedList;
 
@@ -65,16 +63,6 @@ public class BattleField extends JFrame {
 	 * True if the animation must be played
 	 */
 	private boolean play;
-
-	/**
-	 * Mouse adapter for the Frame
-	 */
-	private MouseAdapter mouse;
-
-	/**
-	 * Keyboard adapter for the Frame
-	 */
-	private KeyAdapter keyboard;
 
 	// Environment
 	/**
@@ -138,52 +126,16 @@ public class BattleField extends JFrame {
 
 		play = false;
 
-		this.mouse = new MouseAdapter() {
-			@Override
-			public void mousePressed(MouseEvent e) {
-				// TODO
-			}
-
-			@Override
-			public void mouseDragged(MouseEvent e) {
-				// TODO
-			}
-		};
-
-		addMouseListener(mouse);
-		addMouseMotionListener(mouse);
-
-		this.keyboard = new KeyAdapter() {
+		addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyPressed(KeyEvent e) {
-				if (e.getKeyCode() == KeyEvent.VK_S) {
-					// Square formation
-					redLeader.setFormationOrder(Leader.FORMATION_SQUARE);
-				}
-
-				if (e.getKeyCode() == KeyEvent.VK_L) {
-					// Line formation
-					redLeader.setFormationOrder(Leader.FORMATION_LINE);
-				}
-
-				if (e.getKeyCode() == KeyEvent.VK_W) {
-					// Wing formation
-					redLeader.setFormationOrder(Leader.FORMATION_WING);
-				}
-
-				if (e.getKeyCode() == KeyEvent.VK_C) {
-					// Shield formation
-					redLeader.setFormationOrder(Leader.FORMATION_SHIELD);
-				}
-
 				if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-					// Play / Pause
 					setPlay(!playing());
 				}
 			}
-		};
+		});
 
-		addKeyListener(keyboard);
+		//TODO add listeners from human leader
 
 		initSurface();
 		initWeapons();
@@ -446,7 +398,7 @@ public class BattleField extends JFrame {
 
 		if (bf != null) {
 			Graphics g = bf.getDrawGraphics();
-
+			
 			g.clearRect(0, 0, WIDTH, HEIGHT);
 
 			surface.draw(g);
@@ -489,11 +441,10 @@ public class BattleField extends JFrame {
 				g.fillRect(0, 0, WIDTH, HEIGHT);
 
 				g.setColor(Color.white);
-			}
-			else{
+			} else {
 				g.setColor(Color.black);
 			}
-			
+
 			int infoStrWidth = g.getFontMetrics().stringWidth(info);
 			g.drawString(info, (WIDTH / 2) - (infoStrWidth / 2), HEIGHT / 2);
 
@@ -558,14 +509,6 @@ public class BattleField extends JFrame {
 
 	public Surface getSurface() {
 		return surface;
-	}
-
-	public MouseAdapter getMouse() {
-		return mouse;
-	}
-
-	public KeyAdapter getKeyboard() {
-		return keyboard;
 	}
 
 	public synchronized boolean playing() {

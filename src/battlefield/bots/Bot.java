@@ -3,6 +3,8 @@
  */
 package battlefield.bots;
 
+import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.util.LinkedList;
@@ -13,6 +15,7 @@ import javax.vecmath.Vector2d;
 import battlefield.BattleField;
 import battlefield.aStar.Path;
 import battlefield.surface.Waypoint;
+import battlefield.weapons.Bullet;
 import battlefield.weapons.Weapon;
 
 /**
@@ -90,6 +93,29 @@ public abstract class Bot {
 	 */
 	public abstract void update(BattleField env);
 
+	protected void drawLifeBar(Graphics2D g2d) {
+		g2d.setStroke(new BasicStroke(2.0f));
+
+		if (life >= 0.5) {
+			g2d.setColor(Color.green);
+		} else if (life >= 0.2) {
+			g2d.setColor(Color.orange);
+		} else {
+			g2d.setColor(Color.red);
+		}
+
+		g2d.drawLine((int) (position.x - (getRadius() / 2.0d)), (int) (position.y + getRadius()), (int) ((position.x - (getRadius() / 2.0d)) + (life * getRadius())), (int)(position.y + getRadius()));
+
+		g2d.setStroke(new BasicStroke());
+	}
+
+	/**
+	 * Search and return the first enemy at sight
+	 * 
+	 * @param env
+	 *            the {@link BattleField}
+	 * @return the first enemy at sight if any, or else <code>null</code>
+	 */
 	protected Bot enemyAtSight(BattleField env) {
 
 		LinkedList<Bot> deadEnemies = new LinkedList<Bot>();
@@ -112,6 +138,15 @@ public abstract class Bot {
 		return null;
 	}
 
+	/**
+	 * Shoot a {@link Bullet} toward an enemy {@link Bot} with the current
+	 * carried {@link Weapon}
+	 * 
+	 * @param env
+	 *            the {@link BattleField}
+	 * @param enemy
+	 *            the enemy {@link Bot}
+	 */
 	protected void shootEnemy(BattleField env, Bot enemy) {
 		Vector2d aim = new Vector2d(enemy.position.x - position.x, enemy.position.y - position.y);
 
@@ -144,9 +179,7 @@ public abstract class Bot {
 		this.life += life;
 	}
 
-	public double getRadius() {
-		return 0.0d;
-	}
+	public abstract double getRadius();
 
 	public Rectangle getBBox() {
 		return bbox;
@@ -167,7 +200,7 @@ public abstract class Bot {
 	public boolean isAlive() {
 		return life > 0;
 	}
-	
+
 	public double getLife() {
 		return life;
 	}
