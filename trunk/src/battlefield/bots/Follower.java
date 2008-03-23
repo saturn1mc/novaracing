@@ -450,6 +450,9 @@ public class Follower extends Bot {
 		g2d.drawOval((int) (position.x - (radius / 2.0d)), (int) (position.y - (radius / 2.0d)), (int) radius, (int) radius);
 		g2d.fillOval((int) (position.x - (radius / 2.0d)), (int) (position.y - (radius / 2.0d)), (int) radius, (int) radius);
 
+		/* Its life bar */
+		drawLifeBar(g2d);
+		
 		if (Bot.showForces) {
 			/* Its sight rectangle */
 			g2d.setPaint(Color.orange);

@@ -590,23 +590,27 @@ public class Leader extends Bot {
 		g2d.setPaint(color);
 		g2d.fillOval((int) (position.x - (radius / 2.0d)), (int) (position.y - (radius / 2.0d)), (int) radius, (int) radius);
 
-		/* Its current path */
-		if (currentPath != null && currentPath.isSolved()) {
-			Waypoint prev = null;
-
-			for (Waypoint wp : currentPath.getPoints()) {
-
-				wp.draw(g2d);
-
-				if (prev != null) {
-					g2d.drawLine((int) prev.getPosition().x, (int) prev.getPosition().y, (int) wp.getPosition().x, (int) wp.getPosition().y);
-				}
-
-				prev = wp;
-			}
-		}
+		/* Its life bar */
+		drawLifeBar(g2d);
 
 		if (Bot.showForces) {
+			
+			/* Its current path */
+			if (currentPath != null && currentPath.isSolved()) {
+				Waypoint prev = null;
+
+				for (Waypoint wp : currentPath.getPoints()) {
+
+					wp.draw(g2d);
+
+					if (prev != null) {
+						g2d.drawLine((int) prev.getPosition().x, (int) prev.getPosition().y, (int) wp.getPosition().x, (int) wp.getPosition().y);
+					}
+
+					prev = wp;
+				}
+			}
+			
 			/* Its sight rectangle */
 			g2d.setPaint(Color.orange);
 			g2d.draw(sight);
