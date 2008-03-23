@@ -6,9 +6,12 @@ package battlefield.bots;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Rectangle;
+import java.io.IOException;
 import java.util.LinkedList;
 
+import javax.imageio.ImageIO;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
@@ -25,6 +28,16 @@ import battlefield.weapons.Weapon;
 public abstract class Bot {
 
 	public static final boolean showForces = false;
+
+	public static final int HEALTH_WARNING = 0;
+	public static final int AMMO_WARNING = 1;
+	
+	public static final int AMMO_WARNING_LEVEL = 5;
+	public static final double HEALTH_WARNING_LEVEL = 0.7d;
+
+	private static Image healingImage;
+
+	private static Image ammoImage;
 
 	/**
 	 * The bot's name (could be used as an identifier)
@@ -77,6 +90,22 @@ public abstract class Bot {
 		this.position = position;
 		this.life = 1.0;
 		enemies = new LinkedList<Bot>();
+
+		if (ammoImage == null) {
+			try {
+				ammoImage = ImageIO.read(getClass().getResource("/images/gun.png"));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+		if (healingImage == null) {
+			try {
+				healingImage = ImageIO.read(getClass().getResource("/images/redcross.png"));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	/**
@@ -104,9 +133,35 @@ public abstract class Bot {
 			g2d.setColor(Color.red);
 		}
 
-		g2d.drawLine((int) (position.x - (getRadius() / 2.0d)), (int) (position.y + getRadius()), (int) ((position.x - (getRadius() / 2.0d)) + (life * getRadius())), (int)(position.y + getRadius()));
+		g2d.drawLine((int) (position.x - (getRadius() / 2.0d)), (int) (position.y + getRadius()), (int) ((position.x - (getRadius() / 2.0d)) + (life * getRadius())), (int) (position.y + getRadius()));
 
 		g2d.setStroke(new BasicStroke());
+	}
+
+	protected void drawWarning(Graphics2D g2d, int warning) {
+		switch (warning) {
+		case HEALTH_WARNING:
+			if (healingImage != null) {
+				g2d.drawImage(healingImage, (int)(position.x - (getRadius()/2.0d)), (int)(position.y - (getRadius() / 2.0d)), (int)getRadius(), (int)getRadius(), null);
+			}
+
+			g2d.setColor(Color.red);
+			g2d.drawString("Medic !", (int) position.x, (int) position.y);
+
+			break;
+
+		case AMMO_WARNING:
+			if (ammoImage != null) {
+				g2d.drawImage(ammoImage, (int)(position.x - (getRadius()/2.0d)), (int)(position.y - (getRadius() / 2.0d)), (int)getRadius(), (int)getRadius(), null);
+			}
+
+			g2d.setColor(Color.red);
+			g2d.drawString("Need ammo !", (int) position.x, (int) position.y);
+			break;
+
+		default:
+			System.err.println("Unknown warning " + warning);
+		}
 	}
 
 	/**
