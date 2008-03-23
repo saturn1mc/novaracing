@@ -37,7 +37,6 @@ public abstract class Bot {
 	public static final double HEALTH_WARNING_LEVEL = 0.7d;
 
 	private static Image healingImage;
-
 	private static Image ammoImage;
 
 	/**
@@ -297,6 +296,19 @@ public abstract class Bot {
 	 */
 	protected void shootEnemy(BattleField env, Bot enemy) {
 		Vector2d aim = new Vector2d(enemy.position.x - position.x, enemy.position.y - position.y);
+
+		if (currentWeapon != null) {
+			currentWeapon.shoot(env, enemies, new Point2d(position.x, position.y), aim);
+		}
+	}
+	
+	/**
+	 * Shoot in a direction with the current carried {@link Weapon}
+	 * @param env
+	 * @param p
+	 */
+	protected void shootAt(BattleField env, Point2d p) {
+		Vector2d aim = new Vector2d(p.x - position.x, p.y - position.y);
 
 		if (currentWeapon != null) {
 			currentWeapon.shoot(env, enemies, new Point2d(position.x, position.y), aim);

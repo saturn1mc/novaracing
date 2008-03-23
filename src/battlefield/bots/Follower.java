@@ -164,8 +164,8 @@ public class Follower extends Bot {
 			}
 
 			if (target != null && target.isReachedBy(this)) {
-				AmmoPoint pt = (AmmoPoint) target;
-				pt.takeAmmo(this, this.getCurrentWeapon().maxAmmo());
+				AmmoPoint ap = (AmmoPoint) target;
+				ap.takeAmmo(this, this.getCurrentWeapon().maxAmmo());
 				currentState = STATE_SEARCHING;
 				updateState(env);
 			}
@@ -185,8 +185,8 @@ public class Follower extends Bot {
 			}
 
 			if (target != null && target.isReachedBy(this)) {
-				LifePoint pt = (LifePoint) target;
-				pt.takeLife(this, 1 - this.getLife());
+				LifePoint lp = (LifePoint) target;
+				lp.takeLife(this, 1 - this.getLife());
 				currentState = STATE_SEARCHING;
 				updateState(env);
 			}
