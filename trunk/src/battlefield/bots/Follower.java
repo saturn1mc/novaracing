@@ -165,9 +165,10 @@ public class Follower extends Bot {
 	private void updateState(BattleField env) {
 
 		Bot enemy;
-		if (this.currentWeapon.ammoLeft() < 5){
+		
+		if (this.currentWeapon.ammoLeft() < Bot.AMMO_WARNING_LEVEL){
 			currentState = STATE_RELOAD;
-		} else if (this.life < 0.7){
+		} else if (this.life < Bot.HEALTH_WARNING_LEVEL){
 			currentState = STATE_WOUNDED;
 		}  
 		
@@ -217,6 +218,7 @@ public class Follower extends Bot {
 				updateState(env);
 			}
 			break;
+			
 		case STATE_RELOAD:
 			target = env.getReload(this);
 			enemy = enemyAtSight(env);
@@ -232,6 +234,7 @@ public class Follower extends Bot {
 			}
 			currentState = STATE_LEADED;
 			break;
+			
 		case STATE_WOUNDED:
 			
 			target = env.getPainKiller(this);

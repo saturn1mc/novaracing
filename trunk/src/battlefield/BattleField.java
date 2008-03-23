@@ -172,17 +172,20 @@ public class BattleField extends JFrame {
 	 */
 	private void initBonuses() {
 
+		LinkedList<Point2d> used = new LinkedList<Point2d>();
+		
 		// Life points
 		lifePoints = new LinkedList<LifePoint>();
 
 		int added = 0;
 
-		while (added < (BONUS_POINTS_NB / 2)) {
+		while (added < BONUS_POINTS_NB) {
 
 			Point2d p = surface.getGraph().getRandomPoint();
 
-			if (surface.goodPoint(p)) {
+			if (!used.contains(p) && surface.goodPoint(p)) {
 				lifePoints.add(new LifePoint(p, 100));
+				used.add(p);
 			}
 
 			added++;
@@ -193,12 +196,13 @@ public class BattleField extends JFrame {
 
 		added = 0;
 
-		while (added < (BONUS_POINTS_NB / 2)) {
+		while (added < BONUS_POINTS_NB) {
 
 			Point2d p = surface.getGraph().getRandomPoint();
 
-			if (surface.goodPoint(p)) {
+			if (!used.contains(p) && surface.goodPoint(p)) {
 				ammoPoints.add(new AmmoPoint(p, 1000));
+				used.add(p);
 			}
 
 			added++;

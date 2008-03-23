@@ -14,7 +14,7 @@ import battlefield.aStar.Path;
 
 public class Surface {
 	
-	private static final int GOOD_POINT_DIST = 30;
+	private static final int GOOD_POINT_DIST = 10;
 
 	private Rectangle area;
 	private LinkedList<Polygon> objects; // The objects on the surface
