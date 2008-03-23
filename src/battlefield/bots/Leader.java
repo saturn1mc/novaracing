@@ -28,7 +28,7 @@ public class Leader extends Bot {
 	public static final int STATE_ATTACKING = 1;
 	public static final int STATE_ESCAPING = 2;
 	public static final int STATE_RELOAD = 3;
-	public static final int STATE_WOUNDED = 4;	
+	public static final int STATE_WOUNDED = 4;
 
 	public static final int FORMATION_NONE = 0;
 	public static final int FORMATION_LINE = 1;
@@ -37,94 +37,24 @@ public class Leader extends Bot {
 	public static final int FORMATION_SHIELD = 4;
 
 	/**
-	 * Vehicle's radius
-	 */
-	public static final double radius = 15.0d;
-
-	/**
-	 * Vehicle's mass
-	 */
-	private static final double mass = 1.0d;
-
-	/**
-	 * Vehicle's maximum speed
-	 */
-	private static final double maxSpeed = 1.0d;
-
-	/**
-	 * Vehicle's current speed
-	 */
-	private double speed = 0.0d;
-
-	/**
-	 * Maximum force that can be applied to the vehicle
-	 */
-	private static final double maxForce = 0.2d;
-
-	/**
-	 * Number of frame(s) to anticipate the movement
-	 */
-	private static final double predictionCoeff = 60.0d;
-
-	/**
-	 * Steering force
-	 */
-	private Vector2d steering;
-
-	/**
-	 * Current correction
-	 */
-	private Vector2d correction;
-
-	/**
-	 * Velocity force
-	 */
-	private Vector2d velocity;
-
-	/**
-	 * Local space X axis
-	 */
-	private Vector2d forward;
-
-	/**
-	 * Local space Y axis
-	 */
-	private Vector2d side;
-
-	/**
-	 * Predicted position
-	 */
-	private Point2d futurePosition;
-
-	/**
-	 * Vehicle's sight
-	 */
-	private Polygon sight;
-
-	/**
 	 * Current targeted enemy
 	 */
-	private Bot enemy;
+	protected Bot enemy;
 
 	/**
 	 * Latest registered follower
 	 */
-	private LinkedList<Follower> followers;
+	protected LinkedList<Follower> followers;
 
 	/**
 	 * Orders to be given by the leader
 	 */
-	private int formationOrder;
-
-	/**
-	 * Damages
-	 */
-	private double damages;
+	protected int formationOrder;
 
 	/**
 	 * Bot's color
 	 */
-	private Color color;
+	protected Color color;
 
 	public Leader(String name, Point2d position, Color color, int formation) {
 		super(name, position);
@@ -141,7 +71,7 @@ public class Leader extends Bot {
 		this.target = null;
 		this.sight = new Polygon();
 
-		this.steering = new Vector2d(0, 0);
+		this.steering = new Vector2d(1, 0);
 
 		this.correction = new Vector2d(0, 0);
 
@@ -182,18 +112,20 @@ public class Leader extends Bot {
 			sight.addPoint((int) (futurePosition.x - (side.x * radius)), (int) (futurePosition.y - (side.y * radius)));
 			sight.addPoint((int) (futurePosition.x + (side.x * radius)), (int) (futurePosition.y + (side.y * radius)));
 		}
-		
+
 		this.bbox.setLocation((int) (position.x - (radius / 2.0d)), (int) (position.y - (radius / 2.0d)));
 	}
 
 	private void updateState(BattleField env) {
-		
-		if (this.currentWeapon.ammoLeft() < Bot.AMMO_WARNING_LEVEL){
+
+		if (this.currentWeapon.ammoLeft() < Bot.AMMO_WARNING_LEVEL) {
 			currentState = STATE_RELOAD;
-		} else if (this.life < Bot.HEALTH_WARNING_LEVEL){
+			target = null;
+		} else if (this.life < Bot.HEALTH_WARNING_LEVEL) {
 			currentState = STATE_WOUNDED;
+			target = null;
 		}
-		
+
 		switch (currentState) {
 
 		case STATE_SEARCHING:
@@ -239,15 +171,15 @@ public class Leader extends Bot {
 
 		case STATE_ATTACKING:
 
-			enemy = enemyAtSight(env);
 			formationOrder = FORMATION_WING;
+			enemy = enemyAtSight(env);
 
 			if (enemy != null) {
 				currentState = STATE_ATTACKING;
 				target = new Waypoint(enemy.position);
 
 				shootEnemy(env, enemy);
-				
+
 			} else {
 				target = null;
 				currentState = STATE_SEARCHING;
@@ -277,44 +209,50 @@ public class Leader extends Bot {
 			}
 
 			break;
+
 		case STATE_RELOAD:
-			
-			target = env.getReload(this);
+
+			formationOrder = FORMATION_SHIELD;
 			enemy = enemyAtSight(env);
 
 			if (enemy != null) {
 				shootEnemy(env, enemy);
-			}			
-			
-			if (target != null && target.isReachedBy(this)){
-				AmmoPoint pt = (AmmoPoint) target;
-				pt.takeAmmo(this, this.getCurrentWeapon().maxAmmo());	
 			}
-			
-			currentState = STATE_ATTACKING;
-			
+
+			if (target == null) { // First time in state reloading
+				target = env.nearestAmmoPoint(this);
+			}
+
+			if (target != null && target.isReachedBy(this)) {
+				AmmoPoint pt = (AmmoPoint) target;
+				pt.takeAmmo(this, this.getCurrentWeapon().maxAmmo());
+				currentState = STATE_SEARCHING;
+				updateState(env);
+			}
+
 			break;
-			
+
 		case STATE_WOUNDED:
-			
+
+			formationOrder = FORMATION_SHIELD;
 			enemy = enemyAtSight(env);
-			
+
 			if (enemy != null) {
 				shootEnemy(env, enemy);
 			}
-			
-			if(target == null){
-				target = env.getPainKiller(this);
+
+			if (target == null) { // First time in state reloading
+				target = env.nearestLifePoint(this);
 			}
-			
-			if (target != null && target.isReachedBy(this)){
+
+			if (target != null && target.isReachedBy(this)) {
 				LifePoint pt = (LifePoint) target;
-				pt.takeLife(this, 1-this.getLife());
-				
+				pt.takeLife(this, 1 - this.getLife());
+				currentState = STATE_SEARCHING;
+				updateState(env);
 			}
-			
-			currentState = STATE_ATTACKING;
-			break;		
+
+			break;
 
 		default:
 			System.err.println("Unknown state : " + currentState);
@@ -325,7 +263,7 @@ public class Leader extends Bot {
 	 * Computes the forces to apply to the vehicle (steering direction,
 	 * acceleration and velocity)
 	 */
-	private void updateForces() {
+	protected void updateForces() {
 
 		/* Going to target */
 		if (target != null) {
@@ -354,7 +292,7 @@ public class Leader extends Bot {
 	 * Updates the future position point (the position of the vehicle in
 	 * <code>predictionCoeff</code> frames if it stays on the same direction)
 	 */
-	private void updateFuturePosition() {
+	protected void updateFuturePosition() {
 		futurePosition.set(position.x + (velocity.x * predictionCoeff), position.y + (velocity.y * predictionCoeff));
 	}
 
@@ -363,7 +301,7 @@ public class Leader extends Bot {
 	 * 
 	 * @param env
 	 */
-	private void computeTrajectoryCorrection(BattleField env) {
+	protected void computeTrajectoryCorrection(BattleField env) {
 
 		correction.set(0, 0);
 
@@ -453,14 +391,6 @@ public class Leader extends Bot {
 		}
 
 		return vT;
-	}
-
-	public double getDamages() {
-		return damages;
-	}
-
-	public void setDamages(double damages) {
-		this.damages = damages;
 	}
 
 	public Vector2d getSpeed() {
@@ -604,7 +534,7 @@ public class Leader extends Bot {
 		drawLifeBar(g2d);
 
 		if (Bot.showForces) {
-			
+
 			/* Its current path */
 			if (currentPath != null && currentPath.isSolved()) {
 				Waypoint prev = null;
@@ -620,7 +550,7 @@ public class Leader extends Bot {
 					prev = wp;
 				}
 			}
-			
+
 			/* Its sight rectangle */
 			g2d.setPaint(Color.orange);
 			g2d.draw(sight);
@@ -642,33 +572,6 @@ public class Leader extends Bot {
 			g2d.setPaint(Color.white);
 			g2d.drawString(name, (float) (position.x + radius), (float) position.y);
 		}
-	}
-
-	/**
-	 * Draws a scaled {@link Vector2d}
-	 * 
-	 * @param g2d
-	 * @param v
-	 * @param c
-	 * @param scale
-	 */
-	private void drawVector(Graphics2D g2d, Vector2d v, Color c, double scale) {
-		g2d.setPaint(c);
-		g2d.drawLine((int) position.x, (int) position.y, (int) (position.x + (v.x * scale)), (int) (position.y + (v.y * scale)));
-		g2d.fillOval((int) (position.x + (v.x * scale) - 2.5), (int) (position.y + (v.y * scale) - 2.5), 5, 5);
-	}
-
-	/**
-	 * Draws a {@link Point2d}
-	 * 
-	 * @param g2d
-	 * @param p
-	 * @param c
-	 * @param radius
-	 */
-	private void drawPoint(Graphics2D g2d, Point2d p, Color c, double radius) {
-		g2d.setPaint(c);
-		g2d.fillOval((int) (p.x - (radius / 2.0d)), (int) (p.y - (radius / 2.0d)), (int) radius, (int) radius);
 	}
 
 }

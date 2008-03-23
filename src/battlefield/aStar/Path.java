@@ -25,7 +25,7 @@ public class Path {
 		path = new LinkedList<Waypoint>();
 		
 		for(Waypoint wp : p.path){
-			path.add(new Waypoint(new Point2d(wp.getPosition())));
+			path.add(wp);
 		}
 	}
 
@@ -46,7 +46,7 @@ public class Path {
 			
 			p = pere.get(p);
 		}
-
+		
 		if (p != null) {
 			Waypoint wp = new Waypoint(p);
 			

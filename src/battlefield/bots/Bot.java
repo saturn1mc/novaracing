@@ -7,6 +7,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.io.IOException;
 import java.util.LinkedList;
@@ -31,7 +32,7 @@ public abstract class Bot {
 
 	public static final int HEALTH_WARNING = 0;
 	public static final int AMMO_WARNING = 1;
-	
+
 	public static final int AMMO_WARNING_LEVEL = 5;
 	public static final double HEALTH_WARNING_LEVEL = 0.7d;
 
@@ -43,6 +44,71 @@ public abstract class Bot {
 	 * The bot's name (could be used as an identifier)
 	 */
 	protected String name;
+
+	/**
+	 * Bot's radius
+	 */
+	protected static final double radius = 15.0d;
+
+	/**
+	 * Bot's mass
+	 */
+	protected static final double mass = 1.0d;
+
+	/**
+	 * Bot's maximum speed
+	 */
+	protected static final double maxSpeed = 1.0d;
+
+	/**
+	 * Bot's current speed
+	 */
+	protected double speed = 0.0d;
+
+	/**
+	 * Maximum force that can be applied to the vehicle
+	 */
+	protected static final double maxForce = 0.25d;
+
+	/**
+	 * Number of frame(s) to anticipate the movement
+	 */
+	protected static final double predictionCoeff = 30.0d;
+
+	/**
+	 * Steering force
+	 */
+	protected Vector2d steering;
+
+	/**
+	 * Current correction
+	 */
+	protected Vector2d correction;
+
+	/**
+	 * Velocity force
+	 */
+	protected Vector2d velocity;
+
+	/**
+	 * Local space X axis
+	 */
+	protected Vector2d forward;
+
+	/**
+	 * Local space Y axis
+	 */
+	protected Vector2d side;
+
+	/**
+	 * Predicted position
+	 */
+	protected Point2d futurePosition;
+
+	/**
+	 * Bot's sight
+	 */
+	protected Polygon sight;
 
 	/**
 	 * Bot's current weapon
@@ -109,6 +175,13 @@ public abstract class Bot {
 	}
 
 	/**
+	 * Update the bot on each frame
+	 * 
+	 * @param env
+	 */
+	public abstract void update(BattleField env);
+
+	/**
 	 * Draws the bot
 	 * 
 	 * @param g2d
@@ -116,11 +189,31 @@ public abstract class Bot {
 	public abstract void draw(Graphics2D g2d);
 
 	/**
-	 * Update the bot on each frame
+	 * Draws a scaled {@link Vector2d}
 	 * 
-	 * @param env
+	 * @param g2d
+	 * @param v
+	 * @param c
+	 * @param scale
 	 */
-	public abstract void update(BattleField env);
+	protected void drawVector(Graphics2D g2d, Vector2d v, Color c, double scale) {
+		g2d.setPaint(c);
+		g2d.drawLine((int) position.x, (int) position.y, (int) (position.x + (v.x * scale)), (int) (position.y + (v.y * scale)));
+		g2d.fillOval((int) (position.x + (v.x * scale) - 2.5), (int) (position.y + (v.y * scale) - 2.5), 5, 5);
+	}
+
+	/**
+	 * Draws a {@link Point2d}
+	 * 
+	 * @param g2d
+	 * @param p
+	 * @param c
+	 * @param radius
+	 */
+	protected void drawPoint(Graphics2D g2d, Point2d p, Color c, double radius) {
+		g2d.setPaint(c);
+		g2d.fillOval((int) (p.x - (radius / 2.0d)), (int) (p.y - (radius / 2.0d)), (int) radius, (int) radius);
+	}
 
 	protected void drawLifeBar(Graphics2D g2d) {
 		g2d.setStroke(new BasicStroke(2.0f));
@@ -142,7 +235,7 @@ public abstract class Bot {
 		switch (warning) {
 		case HEALTH_WARNING:
 			if (healingImage != null) {
-				g2d.drawImage(healingImage, (int)(position.x - (getRadius()/2.0d)), (int)(position.y - (getRadius() / 2.0d)), (int)getRadius(), (int)getRadius(), null);
+				g2d.drawImage(healingImage, (int) (position.x - (getRadius() / 2.0d)), (int) (position.y - (getRadius() / 2.0d)), (int) getRadius(), (int) getRadius(), null);
 			}
 
 			g2d.setColor(Color.red);
@@ -152,7 +245,7 @@ public abstract class Bot {
 
 		case AMMO_WARNING:
 			if (ammoImage != null) {
-				g2d.drawImage(ammoImage, (int)(position.x - (getRadius()/2.0d)), (int)(position.y - (getRadius() / 2.0d)), (int)getRadius(), (int)getRadius(), null);
+				g2d.drawImage(ammoImage, (int) (position.x - (getRadius() / 2.0d)), (int) (position.y - (getRadius() / 2.0d)), (int) getRadius(), (int) getRadius(), null);
 			}
 
 			g2d.setColor(Color.red);
