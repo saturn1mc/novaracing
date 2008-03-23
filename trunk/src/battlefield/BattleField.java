@@ -51,12 +51,12 @@ public class BattleField extends JFrame {
 	/**
 	 * Number of unit in the red team (excluding the leader)
 	 */
-	public static final int RED_TEAM_SIZE = 0;
+	public static final int RED_TEAM_SIZE = 9;
 
 	/**
 	 * Number of unit in the blue team (excluding the leader)
 	 */
-	public static final int BLUE_TEAM_SIZE = 0;
+	public static final int BLUE_TEAM_SIZE = 9;
 
 	/**
 	 * Number of bonus point on the map

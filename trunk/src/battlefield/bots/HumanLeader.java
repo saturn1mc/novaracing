@@ -14,6 +14,8 @@ import javax.vecmath.Point2d;
 
 import battlefield.BattleField;
 import battlefield.aStar.Path;
+import battlefield.bonuses.AmmoPoint;
+import battlefield.bonuses.LifePoint;
 import battlefield.surface.Waypoint;
 
 /**
@@ -45,14 +47,24 @@ public class HumanLeader extends Leader {
 		this.mouse = new MouseAdapter() {
 
 			@Override
+			public void mousePressed(MouseEvent e) {
+				shootAt(field, new Point2d(e.getX(), e.getY()));
+			}
+
+			@Override
 			public void mouseMoved(MouseEvent e) {
 				Point2d start = new Point2d(getPosition().x, getPosition().y);
 				Point2d stop = new Point2d(e.getX(), e.getY());
-				
-				currentPath = new Path(field.getSurface().solve(start, stop));
 
-				if (currentPath != null && currentPath.isSolved()) {
-					target = currentPath.getPoints().getFirst();
+				if (field.getSurface().canSee(start, stop)) {
+					target = new Waypoint(stop);
+				}
+				else{
+					currentPath = new Path(field.getSurface().solve(start, stop));
+
+					if (currentPath != null && currentPath.isSolved()) {
+						target = currentPath.getPoints().getFirst();
+					}
 				}
 			}
 		};
@@ -86,6 +98,8 @@ public class HumanLeader extends Leader {
 	@Override
 	public void update(BattleField env) {
 
+		enemy = enemyAtSight(env);
+		
 		if (target != null) {
 
 			// TODO take the other elements effects into account
@@ -113,6 +127,16 @@ public class HumanLeader extends Leader {
 
 			if (target.isReachedBy(this)) {
 				target = target.getNext();
+			}
+			
+			LifePoint lp = field.nearestLifePoint(this);
+			if(lp.isReachedBy(this)){
+				lp.takeLife(this, 1 - this.getLife());
+			}
+			
+			AmmoPoint ap = field.nearestAmmoPoint(this);
+			if(ap.isReachedBy(this)){
+				ap.takeAmmo(this, this.getCurrentWeapon().maxAmmo());
 			}
 		}
 
@@ -143,7 +167,7 @@ public class HumanLeader extends Leader {
 		if (target != null) {
 			g2d.drawLine((int) position.x, (int) position.y, (int) target.getPosition().x, (int) target.getPosition().y);
 		}
-		
+
 		/* Its current path */
 		if (currentPath != null && currentPath.isSolved()) {
 			Waypoint prev = null;
