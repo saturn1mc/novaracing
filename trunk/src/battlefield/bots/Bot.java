@@ -30,8 +30,8 @@ public abstract class Bot {
 
 	public static final boolean showForces = false;
 
-	public static final int HEALTH_WARNING = 0;
-	public static final int AMMO_WARNING = 1;
+	public static final int WARNING_HEALTH = 0;
+	public static final int WARNING_AMMO = 1;
 
 	public static final int AMMO_WARNING_LEVEL = 5;
 	public static final double HEALTH_WARNING_LEVEL = 0.7d;
@@ -47,17 +47,17 @@ public abstract class Bot {
 	/**
 	 * Bot's radius
 	 */
-	protected static final double radius = 15.0d;
+	protected static final double radius = 25.0d;
 
 	/**
 	 * Bot's mass
 	 */
-	protected static final double mass = 1.0d;
+	protected static final double mass = 0.9d;
 
 	/**
 	 * Bot's maximum speed
 	 */
-	protected static final double maxSpeed = 1.0d;
+	protected static final double maxSpeed = 1.1d;
 
 	/**
 	 * Bot's current speed
@@ -67,7 +67,7 @@ public abstract class Bot {
 	/**
 	 * Maximum force that can be applied to the vehicle
 	 */
-	protected static final double maxForce = 0.25d;
+	protected static final double maxForce = 0.3d;
 
 	/**
 	 * Number of frame(s) to anticipate the movement
@@ -148,6 +148,16 @@ public abstract class Bot {
 	 * The bot's bounding box
 	 */
 	protected Rectangle bbox;
+	
+	/**
+	 * Bot's color
+	 */
+	protected Color color;
+	
+	/**
+	 * Bot's logo
+	 */
+	protected Image logo;
 
 	public Bot(String name, Point2d position) {
 		super();
@@ -232,7 +242,7 @@ public abstract class Bot {
 
 	protected void drawWarning(Graphics2D g2d, int warning) {
 		switch (warning) {
-		case HEALTH_WARNING:
+		case WARNING_HEALTH:
 			if (healingImage != null) {
 				g2d.drawImage(healingImage, (int) (position.x - (getRadius() / 2.0d)), (int) (position.y - (getRadius() / 2.0d)), (int) getRadius(), (int) getRadius(), null);
 			}
@@ -242,7 +252,7 @@ public abstract class Bot {
 
 			break;
 
-		case AMMO_WARNING:
+		case WARNING_AMMO:
 			if (ammoImage != null) {
 				g2d.drawImage(ammoImage, (int) (position.x - (getRadius() / 2.0d)), (int) (position.y - (getRadius() / 2.0d)), (int) getRadius(), (int) getRadius(), null);
 			}
@@ -337,6 +347,10 @@ public abstract class Bot {
 
 	public void heal(double life) {
 		this.life += life;
+	}
+	
+	public void setLogo(Image logo) {
+		this.logo = logo;
 	}
 
 	public abstract double getRadius();

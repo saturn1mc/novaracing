@@ -159,7 +159,7 @@ public class Follower extends Bot {
 				shootEnemy(env, enemy);
 			}
 
-			if (target == null) { //First time in state reloading
+			if (target == null) { // First time in reload state
 				target = env.nearestAmmoPoint(this);
 			}
 
@@ -180,7 +180,7 @@ public class Follower extends Bot {
 				shootEnemy(env, enemy);
 			}
 
-			if (target == null) { //First time in state reloading
+			if (target == null) { // First time in state reloading
 				target = env.nearestLifePoint(this);
 			}
 
@@ -375,20 +375,29 @@ public class Follower extends Bot {
 		return radius;
 	}
 
-	/* ------------------------- */
-	/* --- Drawing functions --- */
-	/* ------------------------- */
-
 	@Override
 	public void draw(Graphics2D g2d) {
 
 		/* The bot */
-		g2d.setPaint(color);
-		g2d.drawOval((int) (position.x - (radius / 2.0d)), (int) (position.y - (radius / 2.0d)), (int) radius, (int) radius);
-		g2d.fillOval((int) (position.x - (radius / 2.0d)), (int) (position.y - (radius / 2.0d)), (int) radius, (int) radius);
+		if (logo != null) {
+			g2d.drawImage(logo, (int) (position.x - (radius / 2.0d)), (int) (position.y - (radius / 2.0d)), (int) radius, (int) radius, null);
+		} else {
+			g2d.setPaint(color);
+			g2d.drawOval((int) (position.x - (radius / 2.0d)), (int) (position.y - (radius / 2.0d)), (int) radius, (int) radius);
+			g2d.fillOval((int) (position.x - (radius / 2.0d)), (int) (position.y - (radius / 2.0d)), (int) radius, (int) radius);
+		}
 
 		/* Its life bar */
 		drawLifeBar(g2d);
+
+		/* Show warnings (life is more important than ammo) */
+		if (life < HEALTH_WARNING_LEVEL) {
+			drawWarning(g2d, Bot.WARNING_HEALTH);
+		} else {
+			if (currentWeapon.ammoLeft() < AMMO_WARNING_LEVEL) {
+				drawWarning(g2d, Bot.WARNING_AMMO);
+			}
+		}
 
 		if (Bot.showForces) {
 			/* Its sight rectangle */

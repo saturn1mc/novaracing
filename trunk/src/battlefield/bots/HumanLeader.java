@@ -39,16 +39,34 @@ public class HumanLeader extends Leader {
 	 */
 	private KeyAdapter keyboard;
 
+	/**
+	 * Shooting indicator
+	 */
+	private boolean shoot;
+
+	/**
+	 * Shooting aim point
+	 */
+	private Point2d aim;
+
 	public HumanLeader(BattleField env, String name, Point2d position, Color color, int formation) {
 
 		super(name, position, color, formation);
 
 		this.field = env;
+		this.shoot = false;
+
 		this.mouse = new MouseAdapter() {
 
 			@Override
 			public void mousePressed(MouseEvent e) {
-				shootAt(field, new Point2d(e.getX(), e.getY()));
+				aim = new Point2d(e.getX(), e.getY());
+				shoot = true;
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				shoot = false;
 			}
 
 			@Override
@@ -58,8 +76,7 @@ public class HumanLeader extends Leader {
 
 				if (field.getSurface().canSee(start, stop)) {
 					target = new Waypoint(stop);
-				}
-				else{
+				} else {
 					currentPath = new Path(field.getSurface().solve(start, stop));
 
 					if (currentPath != null && currentPath.isSolved()) {
@@ -98,8 +115,12 @@ public class HumanLeader extends Leader {
 	@Override
 	public void update(BattleField env) {
 
-		enemy = enemyAtSight(env);
-		
+		enemy = enemyAtSight(env); // Enemy at sight for the followers
+
+		if (shoot) {
+			shootAt(field, aim);
+		}
+
 		if (target != null) {
 
 			// TODO take the other elements effects into account
@@ -128,14 +149,14 @@ public class HumanLeader extends Leader {
 			if (target.isReachedBy(this)) {
 				target = target.getNext();
 			}
-			
+
 			LifePoint lp = field.nearestLifePoint(this);
-			if(lp.isReachedBy(this)){
+			if (lp.isReachedBy(this)) {
 				lp.takeLife(this, 1 - this.getLife());
 			}
-			
+
 			AmmoPoint ap = field.nearestAmmoPoint(this);
-			if(ap.isReachedBy(this)){
+			if (ap.isReachedBy(this)) {
 				ap.takeAmmo(this, this.getCurrentWeapon().maxAmmo());
 			}
 		}
@@ -154,58 +175,11 @@ public class HumanLeader extends Leader {
 	@Override
 	public void draw(Graphics2D g2d) {
 
-		/* The bot */
-		g2d.setPaint(Color.white);
-		g2d.fillOval((int) (position.x - ((radius + 4) / 2.0d)), (int) (position.y - ((radius + 4) / 2.0d)), (int) (radius + 4), (int) (radius + 4));
-		g2d.setPaint(color);
-		g2d.fillOval((int) (position.x - (radius / 2.0d)), (int) (position.y - (radius / 2.0d)), (int) radius, (int) radius);
-
-		/* Its life bar */
-		drawLifeBar(g2d);
+		super.draw(g2d);
 
 		/* Its current human orders */
 		if (target != null) {
 			g2d.drawLine((int) position.x, (int) position.y, (int) target.getPosition().x, (int) target.getPosition().y);
-		}
-
-		/* Its current path */
-		if (currentPath != null && currentPath.isSolved()) {
-			Waypoint prev = null;
-
-			for (Waypoint wp : currentPath.getPoints()) {
-
-				wp.draw(g2d);
-
-				if (prev != null) {
-					g2d.drawLine((int) prev.getPosition().x, (int) prev.getPosition().y, (int) wp.getPosition().x, (int) wp.getPosition().y);
-				}
-
-				prev = wp;
-			}
-		}
-
-		if (Bot.showForces) {
-
-			/* Its sight rectangle */
-			g2d.setPaint(Color.orange);
-			g2d.draw(sight);
-
-			/* Its velocity */
-			drawVector(g2d, velocity, Color.magenta, 20.0d);
-
-			/* Its trajectory correction */
-			drawVector(g2d, correction, Color.green, 1.0d);
-
-			/* Its local space */
-			drawVector(g2d, forward, Color.cyan, 20.0d);
-			drawVector(g2d, side, Color.cyan, 20.0d);
-
-			/* Its future position */
-			drawPoint(g2d, futurePosition, Color.orange, 8.0d);
-
-			/* Its name */
-			g2d.setPaint(Color.white);
-			g2d.drawString(name, (float) (position.x + radius), (float) position.y);
 		}
 	}
 }

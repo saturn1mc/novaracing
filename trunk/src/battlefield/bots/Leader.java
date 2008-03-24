@@ -51,11 +51,6 @@ public class Leader extends Bot {
 	 */
 	protected int formationOrder;
 
-	/**
-	 * Bot's color
-	 */
-	protected Color color;
-
 	public Leader(String name, Point2d position, Color color, int formation) {
 		super(name, position);
 
@@ -219,7 +214,7 @@ public class Leader extends Bot {
 				shootEnemy(env, enemy);
 			}
 
-			if (target == null) { // First time in state reloading
+			if (target == null) { // First time in reload state
 				target = env.nearestAmmoPoint(this);
 			}
 
@@ -517,21 +512,32 @@ public class Leader extends Bot {
 		return radius;
 	}
 
-	/* ------------------------- */
-	/* --- Drawing functions --- */
-	/* ------------------------- */
-
 	@Override
 	public void draw(Graphics2D g2d) {
 
-		/* The bot */
+		/* Leader's aura */
 		g2d.setPaint(Color.white);
 		g2d.fillOval((int) (position.x - ((radius + 4) / 2.0d)), (int) (position.y - ((radius + 4) / 2.0d)), (int) (radius + 4), (int) (radius + 4));
-		g2d.setPaint(color);
-		g2d.fillOval((int) (position.x - (radius / 2.0d)), (int) (position.y - (radius / 2.0d)), (int) radius, (int) radius);
-
+		
+		/* The bot */
+		if (logo != null) {
+			g2d.drawImage(logo, (int) (position.x - (radius / 2.0d)), (int) (position.y - (radius / 2.0d)), (int) radius, (int) radius, null);
+		} else {
+			g2d.setPaint(color);
+			g2d.fillOval((int) (position.x - (radius / 2.0d)), (int) (position.y - (radius / 2.0d)), (int) radius, (int) radius);
+		}
+		
 		/* Its life bar */
 		drawLifeBar(g2d);
+
+		/* Show warnings (life is more important than ammo) */
+		if (life < HEALTH_WARNING_LEVEL) {
+			drawWarning(g2d, Bot.WARNING_HEALTH);
+		} else {
+			if (currentWeapon.ammoLeft() < AMMO_WARNING_LEVEL) {
+				drawWarning(g2d, Bot.WARNING_AMMO);
+			}
+		}
 
 		if (Bot.showForces) {
 
