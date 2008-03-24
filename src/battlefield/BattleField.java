@@ -4,12 +4,15 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferStrategy;
+import java.io.IOException;
 import java.util.LinkedList;
 
+import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.vecmath.Point2d;
 
@@ -24,20 +27,24 @@ import battlefield.surface.Surface;
 import battlefield.surface.Waypoint;
 import battlefield.weapons.Bullet;
 import battlefield.weapons.Pistol;
+import battlefield.weapons.SubmachineGun;
 import battlefield.weapons.Weapon;
 
 public class BattleField extends JFrame {
 
+	//Constants
 	/**
 	 * Generated SVUID
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	// Human leader
+	// Human leader selection
 	private static final boolean humanRedLeader = true;
 	private static final boolean humanBlueLeader = false;
-
-	// Constants
+	
+	private static Image blueTeamLogo;
+	private static Image redTeamLogo;
+	
 	/**
 	 * Frame width
 	 */
@@ -63,7 +70,7 @@ public class BattleField extends JFrame {
 	 */
 	public static final int BONUS_POINTS_NB = 20;
 
-	// Interactions
+	// Interaction
 	/**
 	 * True if the animation must be played
 	 */
@@ -140,7 +147,21 @@ public class BattleField extends JFrame {
 			}
 		});
 
-		// TODO add listeners from human leader
+		if (redTeamLogo == null) {
+			try {
+				redTeamLogo = ImageIO.read(getClass().getResource("/images/redTeam.png"));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		if (blueTeamLogo == null) {
+			try {
+				blueTeamLogo = ImageIO.read(getClass().getResource("/images/blueTeam.png"));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 
 		initSurface();
 		initWeapons();
@@ -161,7 +182,7 @@ public class BattleField extends JFrame {
 	 * Initializes the {@link Surface}
 	 */
 	private void initSurface() {
-		surface = new Surface(WIDTH, HEIGHT, 60);
+		surface = new Surface(WIDTH, HEIGHT, 70);
 	}
 
 	/**
@@ -225,7 +246,7 @@ public class BattleField extends JFrame {
 
 		// Red team
 		if (humanRedLeader) {
-			redLeader = new HumanLeader(this, "Nova", new Point2d(100, 100), Color.red, Leader.FORMATION_NONE);
+			redLeader = new HumanLeader(this, "Nova", new Point2d(100, 100), Color.red, Leader.FORMATION_SQUARE);
 			this.addMouseListener(((HumanLeader) redLeader).getMouse());
 			this.addMouseMotionListener(((HumanLeader) redLeader).getMouse());
 			this.addKeyListener(((HumanLeader) redLeader).getKeyboard());
@@ -234,18 +255,22 @@ public class BattleField extends JFrame {
 			redLeader = new Leader("RedLeader", new Point2d(100, 100), Color.red, Leader.FORMATION_SQUARE);
 		}
 
+		redLeader.setLogo(redTeamLogo);
+		redLeader.setCurrentWeapon(new SubmachineGun(null));
 		redTeam.add(redLeader);
 
 		for (int i = 0; i < RED_TEAM_SIZE; i++) {
 			Follower f = new Follower("Red_" + i, new Point2d(101, 101), Color.red);
+			f.setCurrentWeapon(new Pistol(null));
 			f.setLeader(redLeader);
+			f.setLogo(redTeamLogo);
 			redLeader.registerFollower(f);
 			redTeam.add(f);
 		}
 
 		// Blue team
 		if (humanBlueLeader) {
-			blueLeader = new HumanLeader(this, "Nova", new Point2d(100, 100), Color.blue, Leader.FORMATION_NONE);
+			blueLeader = new HumanLeader(this, "Nova", new Point2d(100, 100), Color.blue, Leader.FORMATION_SQUARE);
 			redTeam.add(blueLeader);
 			this.addMouseListener(((HumanLeader) blueLeader).getMouse());
 			this.addMouseMotionListener(((HumanLeader) blueLeader).getMouse());
@@ -254,13 +279,16 @@ public class BattleField extends JFrame {
 		} else {
 			blueLeader = new Leader("BlueLeader", new Point2d(BattleField.WIDTH - 100, (BattleField.HEIGHT - 100)), Color.blue, Leader.FORMATION_SQUARE);
 		}
-		
+
+		blueLeader.setLogo(blueTeamLogo);
+		blueLeader.setCurrentWeapon(new SubmachineGun(null));
 		blueTeam.add(blueLeader);
 
 		for (int i = 0; i < BLUE_TEAM_SIZE; i++) {
 			Follower f = new Follower("Blue_" + i, new Point2d((BattleField.WIDTH - 101), (BattleField.HEIGHT - 101)), Color.blue);
-
+			f.setCurrentWeapon(new Pistol(null));
 			f.setLeader(blueLeader);
+			f.setLogo(blueTeamLogo);
 			blueLeader.registerFollower(f);
 			blueTeam.add(f);
 		}
@@ -276,16 +304,6 @@ public class BattleField extends JFrame {
 		for (Bot b : blueTeam) {
 			b.addEnemies(redTeam);
 		}
-
-		// WEAPON TEST
-		for (Bot b : redTeam) {
-			b.setCurrentWeapon(new Pistol(new Point2d(0, 0)));
-		}
-
-		for (Bot b : blueTeam) {
-			b.setCurrentWeapon(new Pistol(new Point2d(0, 0)));
-		}
-		//
 	}
 
 	/**

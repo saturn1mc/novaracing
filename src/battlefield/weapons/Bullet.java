@@ -26,8 +26,9 @@ public class Bullet extends Element{
 	
 	private Vector2d dir;
 	private double maxRange;
-	private double range;
+	private double curentRange;
 	private boolean hasHit;
+	private double damages;
 	private LinkedList<Bot> targets;
 	
 	public Bullet(Point2d position, LinkedList<Bot> enemies, Vector2d dir, double velocity, double maxRange) {
@@ -39,7 +40,9 @@ public class Bullet extends Element{
 		this.targets = enemies;
 		
 		this.maxRange = maxRange;
-		this.range = 0;
+		this.curentRange = 0;
+		
+		this.damages = (velocity / 100.0d);
 		
 		hasHit = false;
 	}
@@ -63,7 +66,7 @@ public class Bullet extends Element{
 				
 				if (bot.getBBox().contains(target.x, target.y)) {
 					hasHit = true;
-					bot.damage(0.1);
+					bot.damage(damages);
 					return;
 				}
 			}
@@ -71,18 +74,18 @@ public class Bullet extends Element{
 	}
 	
 	public boolean isFlying(){
-		return ((range <= maxRange) && (!hasHit));
+		return ((curentRange <= maxRange) && (!hasHit));
 	}
 	
 	@Override
 	public void update(BattleField env) {
-		range += dir.length();
+		curentRange += dir.length();
 		this.position.add(dir);
 	}
 
 	@Override
 	public void draw(Graphics2D g2d) {
-		g2d.setPaint(Color.black);
+		g2d.setPaint(Color.orange);
 		g2d.drawOval((int) (position.x - (radius / 2.0d)), (int) (position.y - (radius / 2.0d)), (int) radius, (int) radius);
 		g2d.fillOval((int) (position.x - (radius / 2.0d)), (int) (position.y - (radius / 2.0d)), (int) radius, (int) radius);
 	}
