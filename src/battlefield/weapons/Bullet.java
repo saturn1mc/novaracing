@@ -85,7 +85,7 @@ public class Bullet extends Element{
 
 	@Override
 	public void draw(Graphics2D g2d) {
-		g2d.setPaint(Color.orange);
+		g2d.setPaint(Color.yellow);
 		g2d.drawOval((int) (position.x - (radius / 2.0d)), (int) (position.y - (radius / 2.0d)), (int) radius, (int) radius);
 		g2d.fillOval((int) (position.x - (radius / 2.0d)), (int) (position.y - (radius / 2.0d)), (int) radius, (int) radius);
 	}
