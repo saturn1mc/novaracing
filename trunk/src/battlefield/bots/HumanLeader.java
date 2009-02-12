@@ -128,7 +128,7 @@ public class HumanLeader extends Leader {
 		// TODO add pie items
 
 		// Item 1 : Move
-		PieItem moveItem = new PieItem(null, Color.RED) {
+		PieItem moveItem = new PieItem(null, "Move here", Color.RED) {
 			@Override
 			public void action() {
 				moveTo((int) getParent().getPosition().x, (int) getParent().getPosition().y);
@@ -136,7 +136,7 @@ public class HumanLeader extends Leader {
 
 		};
 
-		PieItem wingItem = new PieItem(null, Color.BLUE) {
+		PieItem wingItem = new PieItem(null, "Wing formation", Color.BLUE) {
 			@Override
 			public void action() {
 				setFormationOrder(FORMATION_WING);
@@ -144,7 +144,7 @@ public class HumanLeader extends Leader {
 
 		};
 
-		PieItem squareItem = new PieItem(null, Color.GREEN) {
+		PieItem squareItem = new PieItem(null, "Square formation", Color.GREEN) {
 			@Override
 			public void action() {
 				setFormationOrder(FORMATION_SQUARE);
@@ -152,7 +152,7 @@ public class HumanLeader extends Leader {
 
 		};
 
-		PieItem shieldItem = new PieItem(null, Color.MAGENTA) {
+		PieItem shieldItem = new PieItem(null, "Shield formation", Color.MAGENTA) {
 			@Override
 			public void action() {
 				setFormationOrder(FORMATION_SHIELD);

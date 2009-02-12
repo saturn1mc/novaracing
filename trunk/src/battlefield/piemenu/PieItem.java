@@ -41,6 +41,7 @@ public abstract class PieItem {
 		this.icon = icon;
 		this.text = text;
 		this.color = color;
+		this.bbox = new Rectangle();
 		
 		initMouse();
 	}
@@ -55,6 +56,7 @@ public abstract class PieItem {
 			@Override
 			public void mousePressed(MouseEvent e) {
 				if(active){
+					parent.setVisible(false);
 					action();
 				}
 			}
