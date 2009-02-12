@@ -47,7 +47,7 @@ public abstract class Bot {
 	/**
 	 * Bot's radius
 	 */
-	protected static final double radius = 25.0d;
+	protected static final double radius = 20.0d;
 
 	/**
 	 * Bot's mass
@@ -57,7 +57,7 @@ public abstract class Bot {
 	/**
 	 * Bot's maximum speed
 	 */
-	protected static final double maxSpeed = 1.1d;
+	protected static final double maxSpeed = 1.5d;
 
 	/**
 	 * Bot's current speed
@@ -67,7 +67,7 @@ public abstract class Bot {
 	/**
 	 * Maximum force that can be applied to the vehicle
 	 */
-	protected static final double maxForce = 0.3d;
+	protected static final double maxForce = 0.2d;
 
 	/**
 	 * Number of frame(s) to anticipate the movement
