@@ -40,7 +40,7 @@ public class BattleField extends JFrame {
 	private static final long serialVersionUID = 1L;
 
 	// Human leader selection
-	private static final boolean humanRedLeader = true;
+	private static final boolean humanRedLeader = false;
 	private static final boolean humanBlueLeader = false;
 
 	private static Image blueTeamLogo;
@@ -69,7 +69,7 @@ public class BattleField extends JFrame {
 	/**
 	 * Number of bonus point on the map
 	 */
-	public static final int BONUS_POINTS_NB = 20;
+	public static final int BONUS_POINTS_NB = 40;
 
 	// Interaction
 	/**
