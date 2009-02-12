@@ -16,11 +16,13 @@ import battlefield.BattleField;
 import battlefield.aStar.Path;
 import battlefield.bonuses.AmmoPoint;
 import battlefield.bonuses.LifePoint;
+import battlefield.piemenu.PieItem;
+import battlefield.piemenu.PieMenu;
 import battlefield.surface.Waypoint;
 
 /**
  * @author Camille
- *
+ * 
  */
 public class HumanLeader extends Leader {
 
@@ -40,6 +42,11 @@ public class HumanLeader extends Leader {
 	private KeyAdapter keyboard;
 
 	/**
+	 * Action menu for the leader
+	 */
+	private PieMenu actionMenu;
+
+	/**
 	 * Shooting indicator
 	 */
 	private boolean shoot;
@@ -55,13 +62,20 @@ public class HumanLeader extends Leader {
 
 		this.field = env;
 		this.shoot = false;
+		this.aim = new Point2d();
 
 		this.mouse = new MouseAdapter() {
 
 			@Override
 			public void mousePressed(MouseEvent e) {
-				aim = new Point2d(e.getX(), e.getY());
-				shoot = true;
+				if (e.getButton() == MouseEvent.BUTTON1) {
+					aim.set(e.getX(), e.getY());
+					shoot = true;
+				}
+
+				if (e.getButton() == MouseEvent.BUTTON3) {
+					selectAction(e);
+				}
 			}
 
 			@Override
@@ -71,18 +85,12 @@ public class HumanLeader extends Leader {
 
 			@Override
 			public void mouseMoved(MouseEvent e) {
-				Point2d start = new Point2d(getPosition().x, getPosition().y);
-				Point2d stop = new Point2d(e.getX(), e.getY());
+				aim.set(e.getX(), e.getY());
+			}
 
-				if (field.getSurface().canSee(start, stop)) {
-					target = new Waypoint(stop);
-				} else {
-					currentPath = new Path(field.getSurface().solve(start, stop));
-
-					if (currentPath != null && currentPath.isSolved()) {
-						target = currentPath.getPoints().getFirst();
-					}
-				}
+			@Override
+			public void mouseDragged(MouseEvent e) {
+				aim.set(e.getX(), e.getY());
 			}
 		};
 
@@ -110,6 +118,77 @@ public class HumanLeader extends Leader {
 				}
 			}
 		};
+
+		initActionMenu();
+	}
+
+	private void initActionMenu() {
+		actionMenu = new PieMenu();
+		actionMenu.setItemsRadius(20);
+		// TODO add pie items
+
+		// Item 1 : Move
+		PieItem moveItem = new PieItem(null, Color.RED) {
+			@Override
+			public void action() {
+				moveTo((int) getParent().getPosition().x, (int) getParent().getPosition().y);
+			}
+
+		};
+
+		PieItem wingItem = new PieItem(null, Color.BLUE) {
+			@Override
+			public void action() {
+				setFormationOrder(FORMATION_WING);
+			}
+
+		};
+
+		PieItem squareItem = new PieItem(null, Color.GREEN) {
+			@Override
+			public void action() {
+				setFormationOrder(FORMATION_SQUARE);
+			}
+
+		};
+
+		PieItem shieldItem = new PieItem(null, Color.MAGENTA) {
+			@Override
+			public void action() {
+				setFormationOrder(FORMATION_SHIELD);
+			}
+
+		};
+
+		actionMenu.addItem(moveItem);
+		actionMenu.addItem(wingItem);
+		actionMenu.addItem(squareItem);
+		actionMenu.addItem(shieldItem);
+		
+		actionMenu.setVisible(false);
+	}
+
+	private void selectAction(MouseEvent e) {
+		actionMenu.setPosition(e.getX(), e.getY());
+		actionMenu.setVisible(true);
+
+		// TODO create pie menu items
+		moveTo(e.getX(), e.getY()); // TODO
+	}
+
+	private void moveTo(int x, int y) {
+		Point2d start = new Point2d(getPosition().x, getPosition().y);
+		Point2d stop = new Point2d(x, y);
+
+		if (field.getSurface().canSee(start, stop)) {
+			target = new Waypoint(stop);
+		} else {
+			currentPath = new Path(field.getSurface().solve(start, stop));
+
+			if (currentPath != null && currentPath.isSolved()) {
+				target = currentPath.getPoints().getFirst();
+			}
+		}
 	}
 
 	@Override
@@ -164,6 +243,10 @@ public class HumanLeader extends Leader {
 		this.bbox.setLocation((int) (position.x - (radius / 2.0d)), (int) (position.y - (radius / 2.0d)));
 	}
 
+	public PieMenu getActionMenu() {
+		return actionMenu;
+	}
+
 	public MouseAdapter getMouse() {
 		return mouse;
 	}
@@ -180,6 +263,12 @@ public class HumanLeader extends Leader {
 		/* Its current human orders */
 		if (target != null) {
 			g2d.drawLine((int) position.x, (int) position.y, (int) target.getPosition().x, (int) target.getPosition().y);
+		}
+
+		/* Action menu */
+		if (actionMenu.isVisible()) {
+			g2d.translate(0, -BattleField.getInstance().getInsets().top);
+			actionMenu.draw(g2d);
 		}
 	}
 }
