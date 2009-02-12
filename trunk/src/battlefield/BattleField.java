@@ -23,6 +23,7 @@ import battlefield.bots.Bot;
 import battlefield.bots.Follower;
 import battlefield.bots.HumanLeader;
 import battlefield.bots.Leader;
+import battlefield.piemenu.PieItem;
 import battlefield.surface.Surface;
 import battlefield.surface.Waypoint;
 import battlefield.weapons.Bullet;
@@ -32,19 +33,19 @@ import battlefield.weapons.Weapon;
 
 public class BattleField extends JFrame {
 
-	//Constants
+	// Constants
 	/**
 	 * Generated SVUID
 	 */
 	private static final long serialVersionUID = 1L;
-	
+
 	// Human leader selection
 	private static final boolean humanRedLeader = true;
 	private static final boolean humanBlueLeader = false;
-	
+
 	private static Image blueTeamLogo;
 	private static Image redTeamLogo;
-	
+
 	/**
 	 * Frame width
 	 */
@@ -126,15 +127,28 @@ public class BattleField extends JFrame {
 	private LinkedList<AmmoPoint> ammoPoints;
 
 	/**
+	 * Singleton
+	 */
+	private static BattleField singleton = null;
+
+	public static BattleField getInstance() {
+		if (singleton == null) {
+			singleton = new BattleField();
+		}
+
+		return singleton;
+	}
+
+	/**
 	 * Default (and currently the only) constructor for the {@link BattleField}
 	 */
-	public BattleField() {
-		super("Battlefield - Boutet, Maurice 2008");
+	private BattleField() {
+		super("Battlefield");
 
 		this.setPreferredSize(new Dimension(WIDTH, HEIGHT));
 		this.pack();
-		this.setResizable(false);
 		this.setLocationRelativeTo(null);
+		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 
 		play = false;
 
@@ -154,7 +168,7 @@ public class BattleField extends JFrame {
 				e.printStackTrace();
 			}
 		}
-		
+
 		if (blueTeamLogo == null) {
 			try {
 				blueTeamLogo = ImageIO.read(getClass().getResource("/images/blueTeam.png"));
@@ -174,6 +188,9 @@ public class BattleField extends JFrame {
 		super.setVisible(b);
 
 		if (b) {
+			this.setSize(this.getWidth(), this.getHeight() + this.getInsets().top);
+			this.setResizable(false);
+
 			this.createBufferStrategy(2); // Buffering
 		}
 	}
@@ -247,10 +264,18 @@ public class BattleField extends JFrame {
 		// Red team
 		if (humanRedLeader) {
 			redLeader = new HumanLeader(this, "Nova", new Point2d(100, 100), Color.red, Leader.FORMATION_SQUARE);
+
 			this.addMouseListener(((HumanLeader) redLeader).getMouse());
 			this.addMouseMotionListener(((HumanLeader) redLeader).getMouse());
+
 			this.addKeyListener(((HumanLeader) redLeader).getKeyboard());
-			//
+			
+			
+			for(PieItem item : ((HumanLeader) redLeader).getActionMenu().getItems()){
+				this.addMouseListener(item.getMouse());
+				this.addMouseMotionListener(item.getMouse());
+			}
+			
 		} else {
 			redLeader = new Leader("RedLeader", new Point2d(100, 100), Color.red, Leader.FORMATION_SQUARE);
 		}
@@ -272,10 +297,16 @@ public class BattleField extends JFrame {
 		if (humanBlueLeader) {
 			blueLeader = new HumanLeader(this, "Nova", new Point2d(100, 100), Color.blue, Leader.FORMATION_SQUARE);
 			redTeam.add(blueLeader);
+
 			this.addMouseListener(((HumanLeader) blueLeader).getMouse());
 			this.addMouseMotionListener(((HumanLeader) blueLeader).getMouse());
+
 			this.addKeyListener(((HumanLeader) blueLeader).getKeyboard());
-			//
+			
+			for(PieItem item : ((HumanLeader) blueLeader).getActionMenu().getItems()){
+				this.addMouseListener(item.getMouse());
+				this.addMouseMotionListener(item.getMouse());
+			}
 		} else {
 			blueLeader = new Leader("BlueLeader", new Point2d(BattleField.WIDTH - 100, (BattleField.HEIGHT - 100)), Color.blue, Leader.FORMATION_SQUARE);
 		}
@@ -444,6 +475,7 @@ public class BattleField extends JFrame {
 
 		if (bf != null) {
 			Graphics g = bf.getDrawGraphics();
+			g.translate(0, this.getInsets().top);
 
 			g.clearRect(0, 0, WIDTH, HEIGHT);
 
@@ -476,6 +508,7 @@ public class BattleField extends JFrame {
 
 		if (bf != null) {
 			Graphics g = bf.getDrawGraphics();
+			g.translate(0, this.getInsets().top);
 
 			surface.draw(g);
 			drawWeapons(g);
@@ -607,8 +640,7 @@ public class BattleField extends JFrame {
 	}
 
 	public static void main(String args[]) {
-		BattleField bf = new BattleField();
-		bf.getAnimationThread().start();
-		bf.setVisible(true);
+		BattleField.getInstance().setVisible(true);
+		BattleField.getInstance().getAnimationThread().start();
 	}
 }
