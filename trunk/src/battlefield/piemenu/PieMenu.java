@@ -32,7 +32,7 @@ public class PieMenu {
 			Vector2d dir = new Vector2d();
 			Vector2d forward = new Vector2d(0, 1);
 			
-			double menuRadius = (items.size() * 2.0 * itemsRadius) / (2.0 * Math.PI);
+			double menuRadius = (items.size() * 1.5 * itemsRadius) / (2.0 * Math.PI);
 			double rotationDelta = ((2.0d * Math.PI) / items.size());
 			double rotation = 0;
 			

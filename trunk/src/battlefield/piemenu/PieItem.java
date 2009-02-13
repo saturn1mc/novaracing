@@ -15,54 +15,57 @@ import javax.vecmath.Point2d;
 
 /**
  * @author cmaurice2
- *
+ * 
  */
 public abstract class PieItem {
-	
+
 	private PieMenu parent;
-	
+
 	private Image icon;
 	private Color color;
 	private String text;
 	private MouseAdapter mouse;
 	private boolean active;
 	private Rectangle bbox;
-	
+
 	public PieItem(Image icon, Color color) {
 		this.icon = icon;
 		this.text = "";
 		this.color = color;
 		this.bbox = new Rectangle();
-		
+
 		initMouse();
 	}
-	
+
 	public PieItem(Image icon, String text, Color color) {
 		this.icon = icon;
 		this.text = text;
 		this.color = color;
 		this.bbox = new Rectangle();
-		
+
 		initMouse();
 	}
 
-	private void initMouse(){
-		this.mouse = new MouseAdapter(){
+	private void initMouse() {
+		this.mouse = new MouseAdapter() {
 			@Override
 			public void mouseMoved(MouseEvent e) {
 				setActive(bbox.contains(e.getX(), e.getY()));
 			}
-			
+
 			@Override
 			public void mousePressed(MouseEvent e) {
-				if(active){
+
+				if (e.getButton() == MouseEvent.BUTTON1) {
+					if (active) {
+						action();
+					}
 					parent.setVisible(false);
-					action();
 				}
 			}
 		};
 	}
-	
+
 	public boolean isActive() {
 		return active;
 	}
@@ -70,27 +73,27 @@ public abstract class PieItem {
 	public void setActive(boolean active) {
 		this.active = active;
 	}
-	
-	public void drawAt(Graphics g, Point2d position){
-		
-		Graphics2D g2d = (Graphics2D)g;
-		
+
+	public void drawAt(Graphics g, Point2d position) {
+
+		Graphics2D g2d = (Graphics2D) g;
+
 		this.bbox.setLocation((int) (position.x - (parent.getItemsRadius() / 2.0d)), (int) (position.y - (parent.getItemsRadius() / 2.0d)));
-		
+
 		if (icon != null) {
 			g2d.drawImage(icon, (int) (position.x - (parent.getItemsRadius() / 2.0d)), (int) (position.y - (parent.getItemsRadius() / 2.0d)), (int) parent.getItemsRadius(), (int) parent.getItemsRadius(), null);
 		} else {
 			g2d.setColor(color);
 			g2d.fillOval((int) (position.x - (parent.getItemsRadius() / 2.0d)), (int) (position.y - (parent.getItemsRadius() / 2.0d)), (int) parent.getItemsRadius(), (int) parent.getItemsRadius());
 		}
-		
-		if(active){
+
+		if (active) {
 			g2d.setColor(Color.WHITE);
 			g2d.drawRect(bbox.x, bbox.y, bbox.width, bbox.height);
-			g2d.drawString(text, (int)position.x, (int)position.y);
+			g2d.drawString(text, (int) position.x, (int) position.y);
 		}
 	}
-	
+
 	public Image getIcon() {
 		return icon;
 	}
@@ -106,7 +109,7 @@ public abstract class PieItem {
 	public void setText(String text) {
 		this.text = text;
 	}
-	
+
 	public PieMenu getParent() {
 		return parent;
 	}

@@ -171,9 +171,6 @@ public class HumanLeader extends Leader {
 	private void selectAction(MouseEvent e) {
 		actionMenu.setPosition(e.getX(), e.getY());
 		actionMenu.setVisible(true);
-
-		// TODO create pie menu items
-		moveTo(e.getX(), e.getY()); // TODO
 	}
 
 	private void moveTo(int x, int y) {
@@ -269,6 +266,7 @@ public class HumanLeader extends Leader {
 		if (actionMenu.isVisible()) {
 			g2d.translate(0, -BattleField.getInstance().getInsets().top);
 			actionMenu.draw(g2d);
+			g2d.translate(0, BattleField.getInstance().getInsets().top);
 		}
 	}
 }

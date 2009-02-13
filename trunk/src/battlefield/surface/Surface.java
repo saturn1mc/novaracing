@@ -14,6 +14,7 @@ import battlefield.aStar.Path;
 
 public class Surface {
 	
+	private static final boolean DRAW_GRAPH = false;
 	private static final int GOOD_POINT_DIST = 10;
 
 	private Rectangle area;
@@ -68,25 +69,27 @@ public class Surface {
 	}
 
 	public void draw(Graphics g) {
-
+		
 		//Drawing objects
 		g.setColor(Color.BLACK);
 		for (Polygon p : objects) {
 			g.fillPolygon(p);
 		}
-
-		//Drawing graph connections
-		g.setColor(Color.LIGHT_GRAY);
-		for (Point2d p : graph.getPoints().keySet()) {
-			for (Point2d parent : graph.getPoints().get(p)) {
-				g.drawLine((int) p.x, (int) p.y, (int) parent.x, (int) parent.y);
+		
+		if(DRAW_GRAPH){
+			//Drawing graph connections
+			g.setColor(Color.LIGHT_GRAY);
+			for (Point2d p : graph.getPoints().keySet()) {
+				for (Point2d parent : graph.getPoints().get(p)) {
+					g.drawLine((int) p.x, (int) p.y, (int) parent.x, (int) parent.y);
+				}
 			}
-		}
-
-		//Drawing graph nodes
-		g.setColor(Color.RED);
-		for (Point2d p : graph.getPoints().keySet()) {
-			g.fillOval((int) (p.x - (Graph.PTS_RADIUS / 2.0d)), (int) (p.y - (Graph.PTS_RADIUS / 2.0d)), Graph.PTS_RADIUS, Graph.PTS_RADIUS);
+	
+			//Drawing graph nodes
+			g.setColor(Color.RED);
+			for (Point2d p : graph.getPoints().keySet()) {
+				g.fillOval((int) (p.x - (Graph.PTS_RADIUS / 2.0d)), (int) (p.y - (Graph.PTS_RADIUS / 2.0d)), Graph.PTS_RADIUS, Graph.PTS_RADIUS);
+			}
 		}
 	}
 

@@ -14,7 +14,6 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.vecmath.Point2d;
 
-import nova.elements.HumanVehicle;
 import nova.elements.Obstacle;
 import nova.elements.Vehicle;
 import nova.elements.Waypoint;
@@ -136,9 +135,9 @@ public class Nova extends JPanel {
 		/*
 		 * Human
 		 */
-		HumanVehicle human = new HumanVehicle("saturn1", new Point2d(wp6.getPosition()), wp6.getNext());
-		environment.addElement(human);
-		addKeyListener(human.getKeyboard());
+		//HumanVehicle human = new HumanVehicle("saturn1", new Point2d(wp6.getPosition()), wp6.getNext());
+		//environment.addElement(human);
+		//addKeyListener(human.getKeyboard());
 	}
 	
 	/**
@@ -210,9 +209,9 @@ public class Nova extends JPanel {
 		/*
 		 * Human
 		 */
-		HumanVehicle human = new HumanVehicle("saturn1", new Point2d(wp6.getPosition()), wp6.getNext());
-		environment.addElement(human);
-		addKeyListener(human.getKeyboard());
+//		HumanVehicle human = new HumanVehicle("saturn1", new Point2d(wp6.getPosition()), wp6.getNext());
+//		environment.addElement(human);
+//		addKeyListener(human.getKeyboard());
 	}
 
 	public Thread getAnimationThread() {
@@ -233,6 +232,7 @@ public class Nova extends JPanel {
 	public static void main(String[] args) {
 
 		JFrame frame = new JFrame("Nova Racing");
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		Nova nova = new Nova();
 		nova.loadTestRace2();
