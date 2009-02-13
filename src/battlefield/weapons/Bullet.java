@@ -42,7 +42,7 @@ public class Bullet extends Element{
 		this.maxRange = maxRange;
 		this.curentRange = 0;
 		
-		this.damages = (velocity / 100.0d);
+		this.damages = (velocity / 1000.0d);
 		
 		hasHit = false;
 	}
