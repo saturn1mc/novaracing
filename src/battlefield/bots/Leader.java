@@ -455,13 +455,13 @@ public class Leader extends Bot {
 			int column = (id - 1) % squareSize;
 			int line = (id - 1) / squareSize;
 
-			reference = new Point2d(this.position.x + (this.forward.x * (-radius * 2.0)) + (this.side.x * -(radius * 2.0) * (squareSize / 2)), this.position.y + (this.forward.y * -(radius * 2.0)) + (this.side.y * -(radius * 2.0) * (squareSize / 2)));
+			reference = new Point2d(this.futurePosition.x + (this.forward.x * (-radius * 2.0)) + (this.side.x * -(radius * 2.0) * (squareSize / 2)), this.futurePosition.y + (this.forward.y * -(radius * 2.0)) + (this.side.y * -(radius * 2.0) * (squareSize / 2)));
 			target = new Point2d(reference.x + (this.side.x * (radius * 2.0 * column)) + (this.forward.x * -(radius * 2.0 * line)), reference.y + (this.side.y * (radius * 2.0 * column)) + (this.forward.y * -(radius * 2.0 * line)));
 
 			break;
 
 		case FORMATION_LINE:
-			target = new Point2d(this.position.x + (this.forward.x * -(radius * 2.0 * id)), this.position.y + (this.forward.y * -(radius * 2.0 * id)));
+			target = new Point2d(this.futurePosition.x + (this.forward.x * -(radius * 2.0 * id)), this.futurePosition.y + (this.forward.y * -(radius * 2.0 * id)));
 			break;
 
 		case FORMATION_WING:
@@ -469,7 +469,7 @@ public class Leader extends Bot {
 			int leftWingLimit = (followersNumber / 2);
 			int dist = (id % (followersNumber - leftWingLimit));
 
-			reference = new Point2d(this.position.x - (forward.x * 2.0 * radius), this.position.y - (forward.y * 2.0 * radius));
+			reference = new Point2d(this.futurePosition.x - (forward.x * 2.0 * radius), this.futurePosition.y - (forward.y * 2.0 * radius));
 
 			if (id <= leftWingLimit) {
 				Vector2d leftWingDir = new Vector2d((forward.x * Math.cos(Math.PI)) - (forward.y * Math.sin(Math.PI * 0.9d)), (forward.y * Math.cos(Math.PI * 0.9d)) + (forward.x * Math.sin(Math.PI * 0.9d)));
@@ -491,12 +491,12 @@ public class Leader extends Bot {
 			double rotation = (id - 1) * ((2.0d * Math.PI) / followersNumber);
 			Vector2d dir = new Vector2d((forward.x * Math.cos(rotation)) - (forward.y * Math.sin(rotation)), (forward.y * Math.cos(rotation)) + (forward.x * Math.sin(rotation)));
 
-			target = new Point2d(this.position.x + (dir.x * shieldRadius), this.position.y + (dir.y * shieldRadius));
+			target = new Point2d(this.futurePosition.x + (dir.x * shieldRadius), this.futurePosition.y + (dir.y * shieldRadius));
 
 			break;
 
 		default:
-			target = this.position;
+			target = this.futurePosition;
 			break;
 		}
 

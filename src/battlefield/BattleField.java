@@ -40,7 +40,7 @@ public class BattleField extends JFrame {
 	private static final long serialVersionUID = 1L;
 
 	// Human leader selection
-	private static final boolean humanRedLeader = false;
+	private static final boolean humanRedLeader = true;
 	private static final boolean humanBlueLeader = false;
 
 	private static Image blueTeamLogo;
@@ -59,13 +59,18 @@ public class BattleField extends JFrame {
 	/**
 	 * Number of unit in the red team (excluding the leader)
 	 */
-	public static final int RED_TEAM_SIZE = 9;
+	public static final int RED_TEAM_SIZE = 12;
 
 	/**
 	 * Number of unit in the blue team (excluding the leader)
 	 */
-	public static final int BLUE_TEAM_SIZE = 9;
+	public static final int BLUE_TEAM_SIZE = 2;
 
+	/**
+	 * Number of points on the surface
+	 */
+	public static final int GRAPH_SIZE = 100;
+	
 	/**
 	 * Number of bonus point on the map
 	 */
@@ -199,7 +204,7 @@ public class BattleField extends JFrame {
 	 * Initializes the {@link Surface}
 	 */
 	private void initSurface() {
-		surface = new Surface(WIDTH, HEIGHT, 70);
+		surface = new Surface(WIDTH, HEIGHT, GRAPH_SIZE);
 	}
 
 	/**
